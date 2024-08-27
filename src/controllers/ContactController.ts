@@ -1,76 +1,136 @@
 import { RequestHandler } from "express";
 import ContactsRepository from "../repositories/ContactsRepository";
+import { z } from "zod";
+import CategoriesRepository from "../repositories/CategoriesRepository";
 
 export const index: RequestHandler = async (request, response) => {
-  const { orderBy } = request.query;
-  const contacts = await ContactsRepository.findAll(orderBy as string);
-  return response.json(contacts);
+  try {
+    const { orderBy } = request.query;
+    const contacts = await ContactsRepository.findAll(orderBy as string);
+    response.json(contacts);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao buscar contatos" });
+  }
 };
 
 export const show: RequestHandler = async (request, response) => {
-  const { id } = request.params;
-  const contact = await ContactsRepository.findById(id);
+  try {
+    const { id } = request.params;
+    const idSchema = z.string();
+    const body = idSchema.safeParse(id);
 
-  if (!contact) {
-    return response.status(404).json({ error: "Contact not found" });
+    if (!body.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+
+    const contact = await ContactsRepository.findById(id);
+    if (!contact) {
+      return response.status(404).json({ error: "Contato não encontrado" });
+    }
+    response.json(contact);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao buscar contato" });
   }
-  response.json(contact);
 };
 
 export const store: RequestHandler = async (request, response) => {
-  const { name, email, phone, categoryId } = request.body;
+  try {
+    const { name, email, phone, categoryId } = request.body;
 
-  if (!name) {
-    return response.status(400).json({ error: "Nome é obrigatório" });
-  }
-  const contactExists = await ContactsRepository.findByEmail(email);
-  if (contactExists) {
-    return response.status(400).json({ error: "Este email ja está em uso" });
-  }
+    const addContactSchema = z.object({
+      name: z.string(),
+      email: z.string().email(),
+      phone: z.string(),
+      categoryId: z.string(),
+    });
+    const categoryExists = await CategoriesRepository.listOne(categoryId);
+    const body = addContactSchema.safeParse(request.body);
 
-  const contact = await ContactsRepository.create({
-    name,
-    email,
-    phone,
-    categoryId,
-  });
-  response.json(contact);
+    if (!categoryExists) {
+      return response.status(404).json({ error: "Categoria não encontrada" });
+    }
+
+    if (!body.success) {
+      return response
+        .status(400)
+        .json({ error: "Todos os campos são obrigatórios" });
+    }
+
+    const contactExists = await ContactsRepository.findByEmail(email);
+    if (contactExists) {
+      return response.status(400).json({ error: "Este email já está em uso" });
+    }
+
+    const contact = await ContactsRepository.create({
+      name,
+      email,
+      phone,
+      categoryId,
+    });
+    response.status(201).json(contact);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao criar contato" });
+  }
 };
 
 export const update: RequestHandler = async (request, response) => {
-  const { name, email, phone, categoryId } = request.body;
-  const { id } = request.params;
-  const contactExists = await ContactsRepository.findById(id);
+  try {
+    const { name, email, phone, categoryId } = request.body;
+    const { id } = request.params;
+    const idSchema = z.string();
+    const updateContactSchema = z.object({
+      name: z.string(),
+      email: z.string().email(),
+      phone: z.string(),
+      categoryId: z.string(),
+    });
+    const idBody = idSchema.safeParse(id);
+    const body = updateContactSchema.safeParse(request.body);
 
-  if (!contactExists) {
-    return response.status(404).json({ error: "Contato inexistente" });
+    if (!idBody.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+    if (!body.success) {
+      return response
+        .status(400)
+        .json({ error: "Todos os campos são obrigatórios" });
+    }
+    const categoryExists = await CategoriesRepository.listOne(categoryId);
+    const contactExists = await ContactsRepository.findById(id);
+
+    if (!categoryExists) {
+      return response.status(404).json({ error: "Categoria não encontrada" });
+    }
+
+    if (!contactExists) {
+      return response.status(404).json({ error: "Contato não encontrado" });
+    }
+
+    const contact = await ContactsRepository.update(id, {
+      name,
+      email,
+      phone,
+      categoryId,
+    });
+    response.json(contact);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao atualizar contato" });
   }
-
-  if (!name) {
-    return response.status(400).json({ error: "Nome é obrigatório" });
-  }
-
-  if (!email) {
-    return response.status(400).json({ error: "Email é obrigatório" });
-  }
-
-  const emailExists = await ContactsRepository.findByEmail(email);
-
-  if (emailExists && emailExists.id !== id) {
-    return response.status(400).json({ error: "Este email já está em uso" });
-  }
-  const contact = await ContactsRepository.update(id, {
-    name,
-    email,
-    phone,
-    categoryId,
-  });
-  response.json(contact);
 };
 
 export const deleteContact: RequestHandler = async (request, response) => {
-  const { id } = request.params;
+  try {
+    const { id } = request.params;
+    const idSchema = z.string();
 
-  await ContactsRepository.delete(id);
-  response.sendStatus(204);
+    const body = idSchema.safeParse(request.params);
+
+    if (!body.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+    await ContactsRepository.delete(id);
+    response.sendStatus(204);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao deletar contato" });
+  }
 };

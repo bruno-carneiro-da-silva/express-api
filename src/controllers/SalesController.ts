@@ -1,5 +1,8 @@
 import { RequestHandler } from "express";
 import SalesRepository from "../repositories/SalesRepository";
+import { z } from "zod";
+import EmployeeRepository from "../repositories/EmployeeRepository";
+import UserRepository from "../repositories/UserRepository";
 
 export const index: RequestHandler = async (request, response) => {
   const { orderBy } = request.query;
@@ -8,64 +11,142 @@ export const index: RequestHandler = async (request, response) => {
 };
 
 export const show: RequestHandler = async (request, response) => {
-  const { id } = request.params;
-  const sale = await SalesRepository.findById(id);
+  try {
+    const { id } = request.params;
+    const saleShowSchema = z.string();
 
-  if (!sale) {
-    return response.status(404).json({ error: "Pedido não encontrado" });
+    const body = saleShowSchema.safeParse(id);
+
+    if (!body.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+
+    const sale = await SalesRepository.findById(id);
+
+    if (!sale) {
+      return response.status(404).json({ error: "Pedido não encontrado" });
+    }
+    response.json(sale);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao buscar a venda" });
   }
-  response.json(sale);
 };
 
 export const store: RequestHandler = async (request, response) => {
-  const { employeeId, userId, totalPrice, discount, soldItems } = request.body;
+  try {
+    const { employeeId, userId, totalPrice, discount, soldItems } =
+      request.body;
 
-  if (
-    !employeeId ||
-    !userId ||
-    !totalPrice ||
-    !soldItems ||
-    !Array.isArray(soldItems)
-  ) {
-    return response
-      .status(400)
-      .json({
+    const addSaleSchema = z.object({
+      employeeId: z.string(),
+      userId: z.string(),
+      totalPrice: z.number(),
+      discount: z.number(),
+      soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
+    });
+
+    const body = addSaleSchema.safeParse(request.body);
+
+    if (!body.success) {
+      return response.status(400).json({
         error: "Todos os campos são obrigatórios e soldItems deve ser um array",
       });
-  }
+    }
 
-  const sale = await SalesRepository.create({
-    employeeId,
-    userId,
-    totalPrice,
-    discount,
-    soldItems,
-  });
-  response.json(sale);
+    const employeeExists = await EmployeeRepository.findById(employeeId);
+    const userExists = await UserRepository.findById(userId);
+    if (!employeeExists) {
+      return response.status(404).json({ error: "Funcionário não encontrado" });
+    }
+
+    if (!userExists) {
+      return response.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    const sale = await SalesRepository.create({
+      employeeId,
+      userId,
+      totalPrice,
+      discount,
+      soldItems,
+    });
+    response.status(201).json(sale);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao criar a venda" });
+  }
 };
 
 export const update: RequestHandler = async (request, response) => {
-  const { employeeId, userId, totalPrice, discount, soldItems } = request.body;
-  const { id } = request.params;
-  const saleExists = await SalesRepository.findById(id);
+  try {
+    const { employeeId, userId, totalPrice, discount, soldItems } =
+      request.body;
+    const { id } = request.params;
+    const updateIdSchema = z.string();
+    const updateSaleSchema = z.object({
+      employeeId: z.string(),
+      userId: z.string(),
+      totalPrice: z.number(),
+      discount: z.number(),
+      soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
+    });
+    const idBody = updateIdSchema.safeParse(id);
+    const body = updateSaleSchema.safeParse(request.body);
 
-  if (!saleExists) {
-    return response.status(404).json({ error: "Pedido não encontrado" });
+    if (!idBody.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+    if (!body.success) {
+      return response.status(400).json({
+        error: "Todos os campos são obrigatórios e soldItems deve ser um array",
+      });
+    }
+    const saleExists = await SalesRepository.findById(id);
+
+    if (!saleExists) {
+      return response.status(404).json({ error: "Pedido não encontrado" });
+    }
+
+    const employeeExists = await EmployeeRepository.findById(employeeId);
+    const userExists = await UserRepository.findById(userId);
+    if (!employeeExists) {
+      return response.status(404).json({ error: "Funcionário não encontrado" });
+    }
+
+    if (!userExists) {
+      return response.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    const sale = await SalesRepository.update(id, {
+      employeeId,
+      userId,
+      totalPrice,
+      discount,
+      soldItems,
+    });
+    response.status(201).json(sale);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao atualizar a venda" });
   }
-
-  const sale = await SalesRepository.update(id, {
-    employeeId,
-    userId,
-    totalPrice,
-    discount,
-    soldItems,
-  });
-  response.json(sale);
 };
 
 export const deleteSale: RequestHandler = async (request, response) => {
-  const { id } = request.params;
+  try {
+    const { id } = request.params;
+    const deleteSaleIdSchema = z.string();
 
-  await SalesRepository.delete(id);
-  response.sendStatus(204);
+    const body = deleteSaleIdSchema.safeParse(id);
+
+    if (!body.success) {
+      return response.status(400).json({ error: "ID inválido" });
+    }
+    const saleExists = await SalesRepository.findById(id);
+
+    if (!saleExists) {
+      return response.status(404).json({ error: "Pedido não encontrado" });
+    }
+    await SalesRepository.delete(id);
+    response.sendStatus(204);
+  } catch (error) {
+    response.status(500).json({ error: "Erro ao deletar a venda" });
+  }
 };

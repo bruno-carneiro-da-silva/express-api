@@ -11,14 +11,14 @@ export const show: RequestHandler = async (request, response) => {
   const { id } = request.params;
   const category = await CategoriesRepository.listOne(id);
   if (!category) {
-    return response.status(404).json({ error: "Category not found" });
+    return response.status(404).json({ error: "Categoria não encontrada" });
   }
   response.json(category);
 };
 export const store: RequestHandler = async (request, response) => {
   const { name } = request.body;
   if (!name) {
-    return response.status(400).json({ error: "Name is required" });
+    return response.status(400).json({ error: "Nome é obrigatório" });
   }
   const category = await CategoriesRepository.create({ name });
   response.json(category);
@@ -33,5 +33,5 @@ export const update: RequestHandler = async (request, response) => {
 export const deleteCategory: RequestHandler = async (request, response) => {
   const { id } = request.params;
   await CategoriesRepository.delete(id);
-  response.json({ message: "Category deleted" });
+  response.json({ message: "Categoria deletada" });
 };

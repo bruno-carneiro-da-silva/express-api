@@ -21,11 +21,11 @@ export const store: RequestHandler = async (request, response) => {
   const { name, email, phone, categoryId } = request.body;
 
   if (!name) {
-    return response.status(400).json({ error: "Name is required" });
+    return response.status(400).json({ error: "Nome é obrigatório" });
   }
   const contactExists = await ContactsRepository.findByEmail(email);
   if (contactExists) {
-    return response.status(400).json({ error: "This email is already in use" });
+    return response.status(400).json({ error: "Este email ja está em uso" });
   }
 
   const contact = await ContactsRepository.create({
@@ -43,21 +43,21 @@ export const update: RequestHandler = async (request, response) => {
   const contactExists = await ContactsRepository.findById(id);
 
   if (!contactExists) {
-    return response.status(404).json({ error: "Contact not found" });
+    return response.status(404).json({ error: "Contato inexistente" });
   }
 
   if (!name) {
-    return response.status(400).json({ error: "Name is required" });
+    return response.status(400).json({ error: "Nome é obrigatório" });
   }
 
   if (!email) {
-    return response.status(400).json({ error: "Email is required" });
+    return response.status(400).json({ error: "Email é obrigatório" });
   }
 
   const emailExists = await ContactsRepository.findByEmail(email);
 
   if (emailExists && emailExists.id !== id) {
-    return response.status(400).json({ error: "This email is already in use" });
+    return response.status(400).json({ error: "Este email já está em uso" });
   }
   const contact = await ContactsRepository.update(id, {
     name,

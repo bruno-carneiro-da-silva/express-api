@@ -12,7 +12,7 @@ export const show: RequestHandler = async (request, response) => {
   const soldItem = await SoldItemRepository.findById(id);
 
   if (!soldItem) {
-    return response.status(404).json({ error: "Sold item not found" });
+    return response.status(404).json({ error: "Item vendido não encontrado" });
   }
   response.json(soldItem);
 };
@@ -21,7 +21,7 @@ export const store: RequestHandler = async (request, response) => {
   const { saleId, productId, qtd, price } = request.body;
 
   if (!saleId || !productId || !qtd || !price) {
-    return response.status(400).json({ error: "All fields are required" });
+    return response.status(400).json({ error: "Todos os campos são obrigatórios" });
   }
 
   const soldItem = await SoldItemRepository.create({
@@ -39,7 +39,7 @@ export const update: RequestHandler = async (request, response) => {
   const soldItemExists = await SoldItemRepository.findById(id);
 
   if (!soldItemExists) {
-    return response.status(404).json({ error: "Sold item not found" });
+    return response.status(404).json({ error: "Item vendido não encontrado" });
   }
 
   const soldItem = await SoldItemRepository.update(id, {

@@ -12,7 +12,7 @@ export const show: RequestHandler = async (request, response) => {
   const stock = await StockRepository.findById(id);
 
   if (!stock) {
-    return response.status(404).json({ error: "Stock not found" });
+    return response.status(404).json({ error: "Item do estoque não encontrado" });
   }
   response.json(stock);
 };
@@ -21,14 +21,14 @@ export const store: RequestHandler = async (request, response) => {
   const { productId, capacity, qtd } = request.body;
 
   if (!productId) {
-    return response.status(400).json({ error: "Product ID is required" });
+    return response.status(400).json({ error: "O id do produto é obrigatório" });
   }
 
   const stockExists = await StockRepository.findByProductId(productId);
   if (stockExists) {
     return response
       .status(400)
-      .json({ error: "Stock for this product already exists" });
+      .json({ error: "O estoque desse produto ja existe" });
   }
 
   const stock = await StockRepository.create({
@@ -45,11 +45,11 @@ export const update: RequestHandler = async (request, response) => {
   const stockExists = await StockRepository.findById(id);
 
   if (!stockExists) {
-    return response.status(404).json({ error: "Stock not found" });
+    return response.status(404).json({ error: "Item do estoque não encontrado" });
   }
 
   if (!productId) {
-    return response.status(400).json({ error: "Product ID is required" });
+    return response.status(400).json({ error: "O id do produto é obrigatório" });
   }
 
   const stock = await StockRepository.update(id, {

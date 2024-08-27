@@ -3,10 +3,11 @@ import EmployeeRepository from "../repositories/EmployeeRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const employees = await EmployeeRepository.findAll();
+    const { orderBy } = request.query;
+    const employees = await EmployeeRepository.findAll(orderBy as string);
     response.json(employees);
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
 
@@ -15,11 +16,11 @@ export const show: RequestHandler = async (request, response) => {
     const { id } = request.params;
     const employee = await EmployeeRepository.findById(id);
     if (!employee) {
-      return response.status(404).json({ error: "Employee not found" });
+      return response.status(404).json({ error: "Funcionário não encontrado" });
     }
     response.json(employee);
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
 
@@ -27,7 +28,9 @@ export const store: RequestHandler = async (request, response) => {
   try {
     const { name, email, phone, address, role, login, senha } = request.body;
     if (!name || !email || !phone || !address || !role || !login || !senha) {
-      return response.status(400).json({ error: "All fields are required" });
+      return response
+        .status(400)
+        .json({ error: "Todos os campos são obrigatórios" });
     }
     const newEmployee = await EmployeeRepository.create({
       name,
@@ -40,7 +43,7 @@ export const store: RequestHandler = async (request, response) => {
     });
     response.status(201).json(newEmployee);
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
 
@@ -58,11 +61,11 @@ export const update: RequestHandler = async (request, response) => {
       senha,
     });
     if (!updatedEmployee) {
-      return response.status(404).json({ error: "Employee not found" });
+      return response.status(404).json({ error: "Funcionário não encontrado" });
     }
     response.json(updatedEmployee);
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
 
@@ -71,10 +74,10 @@ export const deleteEmployee: RequestHandler = async (request, response) => {
     const { id } = request.params;
     const deletedEmployee = await EmployeeRepository.delete(id);
     if (!deletedEmployee) {
-      return response.status(404).json({ error: "Employee not found" });
+      return response.status(404).json({ error: "Funcionário não encontrado" });
     }
-    response.json({ message: "Employee deleted successfully" });
+    response.json({ message: "Funcionário deletado com sucesso" });
   } catch (error) {
-    response.status(500).json({ error: "Internal Server Error" });
+    response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };

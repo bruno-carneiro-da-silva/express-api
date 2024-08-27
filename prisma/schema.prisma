@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  role      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  products  Product[]
+  contacts  Contact[]
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  name       String
+  email      String?  @unique
+  phone      String
+  categoryId String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Employee {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String
+  address   String
+  role      String
+  login     String   @unique
+  senha     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sales     Sale[]
+  transactions Transaction[]
+}
+
+model Supplier {
+  id              String   @id @default(uuid())
+  cnpj            String   @unique
+  name            String
+  address         String
+  corporateReason String
+  email           String?  @unique
+  phone           String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  transactions    Transaction[]
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  name       String
+  qtd        Int
+  price      Float
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  category   Category @relation(fields: [categoryId], references: [id])
+  stock      Stock?
+  soldItems  SoldItem[]
+  transactions Transaction[]
+}
+
+model Stock {
+  id         String   @id @default(uuid())
+  productId  String @unique
+  capacity   Int
+  qtd        Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
+model Sale {
+  id         String   @id @default(uuid())
+  employeeId String
+  userId     String
+  totalPrice Float
+  discount   Float?
+  productId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+  soldItems  SoldItem[]
+}
+
+model SoldItem {
+  id        String   @id @default(uuid())
+  saleId    String
+  productId String
+  qtd       Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  sale      Sale     @relation(fields: [saleId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  productId   String
+  employeeId  String
+  supplierCnpj String
+  qtd         Int
+  totalPrice  Float
+  selledPrice Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [productId], references: [id])
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  supplier    Supplier @relation(fields: [supplierCnpj], references: [cnpj])
+}

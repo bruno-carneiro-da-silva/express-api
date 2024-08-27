@@ -6,17 +6,30 @@
   "author": "Bruno carneiro",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "5.18.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-async-errors": "^3.1.1",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "zod": "^3.23.8"
   },
   "scripts": {
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon",
+    "build": "tsc",
+    "start": "node build/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.5.0",
     "eslint": "9.x",
     "globals": "^15.3.0",
-    "nodemon": "^3.1.0"
-  }
+    "nodemon": "^3.1.0",
+    "prisma": "^5.18.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "packageManager": "yarn@1.22.10+sha512.21a9d0188f5144f00df3b5464c5ef3b36bb1912c904ab48fb23bb408e81bb0a40e397af92ed7153dec975a0c156b4cb01b777c760ea449828606e60ad36d6a78"
 }

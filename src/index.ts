@@ -4,8 +4,6 @@ import cors from "cors";
 import https from "https";
 import http from "http";
 import adminRoutes from "./routes/admin";
-
-
 import loginRoutes from "./routes/site";
 import { requestInterceptor } from "./utils/requestInterceptor";
 
@@ -25,6 +23,8 @@ const runServer = (port: number, server: http.Server) => {
 };
 
 const regularServer = http.createServer(app);
+const serverPort: number = process.env.PORT ? parseInt(process.env.PORT) : 9000;
+
 if (process.env.NODE_ENV === "production") {
   const server = https.createServer(
     {
@@ -33,10 +33,7 @@ if (process.env.NODE_ENV === "production") {
     },
     app
   );
-  runServer(3001, server);
+  runServer(serverPort, server);
 } else {
-  const serverPort: number = process.env.PORT
-    ? parseInt(process.env.PORT)
-    : 9000;
   runServer(serverPort, regularServer);
 }

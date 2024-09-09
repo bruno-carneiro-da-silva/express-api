@@ -38,6 +38,13 @@ class UsersRepository {
     return user;
   }
 
+  async findByRefreshToken(refreshToken: string) {
+    const user = await prisma.user.findFirst({
+      where: { refreshToken },
+    });
+    return user;
+  }
+
   async create({ username, password, role }: IUser) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({

@@ -12,7 +12,7 @@ model User {
   username      String   @unique
   password      String
   role          String
-  refreshToken  String?  // Add this line
+  refreshToken  String?  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   sales         Sale[]

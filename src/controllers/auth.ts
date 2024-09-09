@@ -25,7 +25,6 @@ export const login: RequestHandler = async (req, res) => {
     return res.status(403).json({ error: "Acesso negado" });
   }
 
-
   const refreshToken = auth.generateRefreshToken(body.data.username);
   await UsersRepository.updateRefreshToken(user.id, refreshToken);
 
@@ -41,7 +40,6 @@ export const validate: RequestHandler = async (req, res, next) => {
   }
   const token = authHeader.split(" ")[1];
   if (!auth.validateToken(token)) {
-    
     const user = await UsersRepository.findByAccessToken(token);
     if (!user || !auth.validateRefreshToken(user?.refreshToken ?? "")) {
       return res.status(403).json({ error: "Acesso negado" });
@@ -53,4 +51,20 @@ export const validate: RequestHandler = async (req, res, next) => {
     res.setHeader("Authorization", `Bearer ${newAccessToken}`);
   }
   next();
+};
+
+export const refreshToken: RequestHandler = async (req, res) => {
+  const refreshTokenSchema = z.object({
+    token: z.string(),
+  });
+  const body = refreshTokenSchema.safeParse(req.body);
+  if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
+
+  const user = await UsersRepository.findByRefreshToken(body.data.token);
+  if (!user || !auth.validateRefreshToken(body.data.token)) {
+    return res.status(403).json({ error: "Acesso negado" });
+  }
+
+  const newAccessToken = auth.generateToken(user.username);
+  res.json({ accessToken: newAccessToken });
 };

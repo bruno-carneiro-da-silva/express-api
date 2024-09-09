@@ -24,7 +24,9 @@
   "scripts": {
     "dev": "nodemon",
     "build": "tsup src",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy"
   },
   "devDependencies": {
     "@eslint/js": "^9.3.0",

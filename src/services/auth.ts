@@ -21,7 +21,7 @@ export const validadeCredentials = async (
 
 export const generateToken = (username: string) => {
   const payload = { username };
-  const options = { expiresIn: "5m" };
+  const options = { expiresIn: "15m" };
   return jwt.sign(payload, JWT_SECRET, options);
 };
 

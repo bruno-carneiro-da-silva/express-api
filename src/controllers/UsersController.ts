@@ -62,6 +62,7 @@ export const store: RequestHandler = async (request, response) => {
 export const update: RequestHandler = async (request, response) => {
   try {
     const { username, password, role } = request.body;
+    const { id } = request.params;
 
     const updateUserSchema = z.object({
       username: z.string(),
@@ -77,7 +78,6 @@ export const update: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const { id } = request.params;
     const userExists = await UsersRepository.findById(id);
 
     if (!userExists) {

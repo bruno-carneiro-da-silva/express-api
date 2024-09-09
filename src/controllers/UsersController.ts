@@ -20,7 +20,9 @@ export const show: RequestHandler = async (request, response) => {
     if (!user) {
       return response.status(404).json({ error: "Usuário não encontrado" });
     }
-    response.json(user);
+    const { refreshToken, ...userWithoutRefreshToken } = user;
+
+    response.json(userWithoutRefreshToken);
   } catch (error) {
     response.status(500).json({ error: "Erro ao buscar usuário" });
   }

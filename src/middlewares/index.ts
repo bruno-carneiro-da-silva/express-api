@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult, body, param } from "express-validator";
 
-// Middleware para remover propriedades desconhecidas
 const sanitizeBody = (allowedFields: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Object.keys(req.body).forEach(key => {
@@ -13,7 +12,6 @@ const sanitizeBody = (allowedFields: string[]) => {
   };
 };
 
-// Middleware para validar e sanitizar o corpo da requisição
 const validateUser = [
   body('username').isString().notEmpty(),
   body('password').isString().notEmpty(),
@@ -27,7 +25,6 @@ const validateUser = [
   }
 ];
 
-// Middleware para validar o ID
 const validateId = [
   param('id').isString().notEmpty(),
   (req: Request, res: Response, next: NextFunction) => {

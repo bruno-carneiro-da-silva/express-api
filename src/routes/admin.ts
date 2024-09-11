@@ -10,6 +10,7 @@ import * as sales from "../controllers/SalesController";
 import * as user from "../controllers/UsersController";
 import * as soldItem from "../controllers/SoldItemController";
 import * as stock from "../controllers/StockController";
+import { sanitizeBody, validateId, validateUser } from "../middlewares";
 
 const router = Router();
 
@@ -45,10 +46,22 @@ router.delete(
 );
 
 router.get("/users", auth.validate, user.index);
-router.get("/users/:id", auth.validate, user.show);
-router.post("/users", user.store);
-router.put("/users/:id", auth.validate, user.update);
-router.delete("/users/:id", auth.validate, user.deleteUser);
+router.get("/users/:id", validateId, auth.validate, user.show);
+router.post(
+  "/users",
+  sanitizeBody(["username", "password", "role"]),
+  validateUser,
+  user.store
+);
+router.put(
+  "/users/:id",
+  validateId,
+  sanitizeBody(["username", "password", "role"]),
+  validateUser,
+  auth.validate,
+  user.update
+);
+router.delete("/users/:id", validateId, auth.validate, user.deleteUser);
 
 router.get("/employees", auth.validate, employee.index);
 router.get("/employees/:id", auth.validate, employee.show);

@@ -8,23 +8,23 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(uuid())
-  username      String
-  firstName     String
-  lastName      String
-  emailAdmin    String   @unique
-  phoneNumberAdmin String
-  password      String
-  nameCompany   String
-  emailCompany  String
-  phoneNumberCompany String
-  addressCompany String
-  terms         Boolean
-  role          String
-  refreshToken  String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  sales         Sale[]
+  id                 String   @id @default(uuid())
+  username           String?
+  firstName          String   @default("")
+  lastName           String   @default("")
+  emailAdmin         String   @unique @default("")
+  phoneNumberAdmin   String   @default("")
+  password           String
+  nameCompany        String   @default("")
+  emailCompany       String   @default("")
+  phoneNumberCompany String   @default("")
+  addressCompany     String   @default("")
+  terms              Boolean? @default(false)
+  role               String?  @default("")
+  refreshToken       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  sales              Sale[]
 }
 
 model Category {

@@ -55,7 +55,7 @@ export const store: RequestHandler = async (request, response) => {
         message: "Número de telefone inválido",
       }),
       addressCompany: z.string(),
-      terms: z.boolean(),
+      terms: z.boolean().optional(),
       password: z.string(),
     });
 
@@ -121,7 +121,7 @@ export const update: RequestHandler = async (request, response) => {
         message: "Número de telefone inválido",
       }),
       addressCompany: z.string(),
-      terms: z.boolean(),
+      terms: z.boolean().optional(),
       password: z.string(),
     });
 

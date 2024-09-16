@@ -23,17 +23,17 @@ class UsersRepository {
     return user;
   }
 
-  async findByUsername(username: string) {
+  async findByEmail(email: string) {
     const user = await prisma.user.findUnique({
-      where: { username },
+      where: { emailAdmin: email },
     });
     return user;
   }
 
   async findByAccessToken(accessToken: string) {
-    const decoded = jwt.decode(accessToken) as { username: string };
+    const decoded = jwt.decode(accessToken) as { email: string };
     const user = await prisma.user.findUnique({
-      where: { username: decoded.username },
+      where: { emailAdmin: decoded.email },
     });
     return user;
   }
@@ -45,10 +45,32 @@ class UsersRepository {
     return user;
   }
 
-  async create({ username, password, role }: IUser) {
+  async create({
+    firstName,
+    lastName,
+    emailAdmin,
+    phoneNumberAdmin,
+    nameCompany,
+    emailCompany,
+    phoneNumberCompany,
+    addressCompany,
+    terms,
+    username,
+    password,
+    role,
+  }: IUser) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
+        firstName,
+        lastName,
+        emailAdmin,
+        phoneNumberAdmin,
+        nameCompany,
+        emailCompany,
+        phoneNumberCompany,
+        addressCompany,
+        terms,
         username,
         password: hashedPassword,
         role,
@@ -60,15 +82,33 @@ class UsersRepository {
   async update(
     id: string,
     {
+      firstName,
+      lastName,
+      emailAdmin,
+      phoneNumberAdmin,
+      nameCompany,
+      emailCompany,
+      phoneNumberCompany,
+      addressCompany,
+      terms,
       username,
       password,
       role,
-    }: { username: string; password: string; role: string }
+    }: IUser
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.update({
       where: { id },
       data: {
+        firstName,
+        lastName,
+        emailAdmin,
+        phoneNumberAdmin,
+        nameCompany,
+        emailCompany,
+        phoneNumberCompany,
+        addressCompany,
+        terms,
         username,
         password: hashedPassword,
         role,

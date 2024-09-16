@@ -6,13 +6,13 @@ import bcrypt from "bcrypt";
 
 export const login: RequestHandler = async (req, res) => {
   const loginSchema = z.object({
-    username: z.string(),
+    email: z.string().email({ message: "Email inválido" }),
     password: z.string().min(8),
   });
   const body = loginSchema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByUsername(body.data.username);
+  const user = await UsersRepository.findByEmail(body.data.email);
   if (!user) {
     return res.status(403).json({ error: "Acesso negado" });
   }
@@ -25,11 +25,11 @@ export const login: RequestHandler = async (req, res) => {
     return res.status(403).json({ error: "Acesso negado" });
   }
 
-  const refreshToken = auth.generateRefreshToken(body.data.username);
+  const refreshToken = auth.generateRefreshToken(body.data.email);
   await UsersRepository.updateRefreshToken(user.id, refreshToken);
 
   res.json({
-    accessToken: auth.generateToken(body.data.username),
+    accessToken: auth.generateToken(body.data.email),
   });
 };
 

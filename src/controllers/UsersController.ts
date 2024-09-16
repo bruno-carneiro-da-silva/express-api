@@ -30,8 +30,34 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { username, password, role } = request.body;
+    const {
+      firstName,
+      lastName,
+      emailAdmin,
+      phoneNumberAdmin,
+      nameCompany,
+      emailCompany,
+      phoneNumberCompany,
+      addressCompany,
+      terms,
+      username,
+      password,
+      role,
+    } = request.body;
     const addUserSchema = z.object({
+      firstName: z.string(),
+      lastName: z.string(),
+      emailAdmin: z.string().email({ message: "Email inválido" }),
+      phoneNumberAdmin: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Número de telefone inválido",
+      }),
+      nameCompany: z.string(),
+      emailCompany: z.string(),
+      phoneNumberCompany: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Número de telefone inválido",
+      }),
+      addressCompany: z.string(),
+      terms: z.boolean(),
       username: z.string(),
       password: z.string(),
       role: z.string(),
@@ -45,12 +71,23 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const userExists = await UsersRepository.findByUsername(username);
+    const userExists = await UsersRepository.findByEmail(emailAdmin);
     if (userExists) {
-      return response.status(400).json({ error: "Esse usuário já existe" });
+      return response
+        .status(400)
+        .json({ error: "Esse email já está cadastrado" });
     }
 
     const user = await UsersRepository.create({
+      firstName,
+      lastName,
+      emailAdmin,
+      phoneNumberAdmin,
+      nameCompany,
+      emailCompany,
+      phoneNumberCompany,
+      addressCompany,
+      terms,
       username,
       password,
       role,
@@ -63,10 +100,36 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { username, password, role } = request.body;
+    const {
+      firstName,
+      lastName,
+      emailAdmin,
+      phoneNumberAdmin,
+      nameCompany,
+      emailCompany,
+      phoneNumberCompany,
+      addressCompany,
+      terms,
+      username,
+      password,
+      role,
+    } = request.body;
     const { id } = request.params;
 
     const updateUserSchema = z.object({
+      firstName: z.string(),
+      lastName: z.string(),
+      emailAdmin: z.string().email({ message: "Email inválido" }),
+      phoneNumberAdmin: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Número de telefone inválido",
+      }),
+      nameCompany: z.string(),
+      emailCompany: z.string().email({ message: "Email inválido" }),
+      phoneNumberCompany: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Número de telefone inválido",
+      }),
+      addressCompany: z.string(),
+      terms: z.boolean(),
       username: z.string(),
       password: z.string(),
       role: z.string(),
@@ -86,17 +149,29 @@ export const update: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Usuário inexistente" });
     }
 
-    const usernameExists = await UsersRepository.findByUsername(username);
+    const emailExists = await UsersRepository.findByEmail(emailAdmin);
 
-    if (usernameExists && usernameExists.id !== id) {
+    if (emailExists && emailExists.id !== id) {
       return response.status(400).json({ error: "Esse usuário já existe" });
     }
+
     const user = await UsersRepository.update(id, {
+      firstName,
+      lastName,
+      emailAdmin,
+      phoneNumberAdmin,
+      nameCompany,
+      emailCompany,
+      phoneNumberCompany,
+      addressCompany,
+      terms,
       username,
       password,
       role,
     });
-    response.json(user);
+
+    const { password: _, ...userWithoutPassword } = user;
+    response.json(userWithoutPassword);
   } catch (error) {
     response.status(500).json({ error: "Erro ao atualizar usuário" });
   }

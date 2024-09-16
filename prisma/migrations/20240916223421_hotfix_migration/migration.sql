@@ -1,9 +1,19 @@
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
-    "username" TEXT NOT NULL,
+    "username" TEXT,
+    "firstName" TEXT NOT NULL DEFAULT '',
+    "lastName" TEXT NOT NULL DEFAULT '',
+    "emailAdmin" TEXT NOT NULL DEFAULT '',
+    "phoneNumberAdmin" TEXT NOT NULL DEFAULT '',
     "password" TEXT NOT NULL,
-    "role" TEXT NOT NULL,
+    "nameCompany" TEXT NOT NULL DEFAULT '',
+    "emailCompany" TEXT NOT NULL DEFAULT '',
+    "phoneNumberCompany" TEXT NOT NULL DEFAULT '',
+    "addressCompany" TEXT NOT NULL DEFAULT '',
+    "terms" BOOLEAN DEFAULT false,
+    "role" TEXT DEFAULT '',
+    "refreshToken" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -131,7 +141,7 @@ CREATE TABLE "Transaction" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
+CREATE UNIQUE INDEX "User_emailAdmin_key" ON "User"("emailAdmin");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Contact_email_key" ON "Contact"("email");

@@ -65,6 +65,6 @@ export const refreshToken: RequestHandler = async (req, res) => {
     return res.status(403).json({ error: "Acesso negado" });
   }
 
-  const newAccessToken = auth.generateToken(user.username);
+  const newAccessToken = auth.generateToken(user.emailAdmin);
   res.json({ accessToken: newAccessToken });
 };

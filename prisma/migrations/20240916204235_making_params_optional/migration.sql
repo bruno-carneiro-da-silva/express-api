@@ -9,7 +9,6 @@
   - Made the column `nameCompany` on table `User` required. This step will fail if there are existing NULL values in that column.
   - Made the column `phoneNumberAdmin` on table `User` required. This step will fail if there are existing NULL values in that column.
   - Made the column `phoneNumberCompany` on table `User` required. This step will fail if there are existing NULL values in that column.
-  - Made the column `terms` on table `User` required. This step will fail if there are existing NULL values in that column.
 
 */
 -- AlterTable
@@ -21,5 +20,4 @@ ALTER COLUMN "firstName" SET NOT NULL,
 ALTER COLUMN "lastName" SET NOT NULL,
 ALTER COLUMN "nameCompany" SET NOT NULL,
 ALTER COLUMN "phoneNumberAdmin" SET NOT NULL,
-ALTER COLUMN "phoneNumberCompany" SET NOT NULL,
-ALTER COLUMN "terms" SET NOT NULL;
+ALTER COLUMN "phoneNumberCompany" SET NOT NULL;

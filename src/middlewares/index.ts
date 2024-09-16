@@ -13,7 +13,6 @@ const sanitizeBody = (allowedFields: string[]) => {
 };
 
 const validateUser = [
-  body("username").isString().notEmpty(),
   body("firstName").isString().notEmpty(),
   body("lastName").isString().notEmpty(),
   body("emailAdmin").isEmail().notEmpty(),
@@ -23,8 +22,6 @@ const validateUser = [
   body("emailCompany").isEmail().notEmpty(),
   body("phoneNumberCompany").isString().notEmpty(),
   body("addressCompany").isString().notEmpty(),
-  body("terms").isBoolean(),
-  body("role").isString().notEmpty(),
   (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

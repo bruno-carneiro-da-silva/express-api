@@ -40,9 +40,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       terms,
-      username,
       password,
-      role,
     } = request.body;
     const addUserSchema = z.object({
       firstName: z.string(),
@@ -58,9 +56,7 @@ export const store: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       terms: z.boolean(),
-      username: z.string(),
       password: z.string(),
-      role: z.string(),
     });
 
     const body = addUserSchema.safeParse(request.body);
@@ -88,9 +84,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       terms,
-      username,
       password,
-      role,
     });
     response.json(user);
   } catch (error) {
@@ -110,9 +104,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       terms,
-      username,
       password,
-      role,
     } = request.body;
     const { id } = request.params;
 
@@ -130,9 +122,7 @@ export const update: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       terms: z.boolean(),
-      username: z.string(),
       password: z.string(),
-      role: z.string(),
     });
 
     const body = updateUserSchema.safeParse(request.body);
@@ -165,9 +155,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       terms,
-      username,
       password,
-      role,
     });
 
     const { password: _, ...userWithoutPassword } = user;

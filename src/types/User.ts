@@ -9,9 +9,9 @@ export interface IUser {
   phoneNumberCompany: string;
   addressCompany: string;
   terms: boolean;
-  username: string;
+  username?: string;
   password: string;
-  role: string;
+  role?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -18,7 +18,7 @@ model User {
   emailCompany       String   @default("")
   phoneNumberCompany String   @default("")
   addressCompany     String   @default("")
-  terms              Boolean? @default(false)
+  terms              Boolean @default(false)
   role               String?  @default("")
   refreshToken       String?
   createdAt          DateTime @default(now())

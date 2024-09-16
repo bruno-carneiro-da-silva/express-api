@@ -49,14 +49,40 @@ router.get("/users", auth.validate, user.index);
 router.get("/users/:id", validateId, auth.validate, user.show);
 router.post(
   "/users",
-  sanitizeBody(["username", "password", "role"]),
+  sanitizeBody([
+    "username",
+    "firstName",
+    "lastName",
+    "emailAdmin",
+    "phoneNumberAdmin",
+    "password",
+    "nameCompany",
+    "emailCompany",
+    "phoneNumberCompany",
+    "addressCompany",
+    "terms",
+    "role",
+  ]),
   validateUser,
   user.store
 );
 router.put(
   "/users/:id",
   validateId,
-  sanitizeBody(["username", "password", "role"]),
+  sanitizeBody([
+    "username",
+    "firstName",
+    "lastName",
+    "emailAdmin",
+    "phoneNumberAdmin",
+    "password",
+    "nameCompany",
+    "emailCompany",
+    "phoneNumberCompany",
+    "addressCompany",
+    "terms",
+    "role",
+  ]),
   validateUser,
   auth.validate,
   user.update

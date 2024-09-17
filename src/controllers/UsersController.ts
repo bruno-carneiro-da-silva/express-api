@@ -83,7 +83,6 @@ export const store: RequestHandler = async (request, response) => {
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      terms,
       password,
     });
     response.json(user);

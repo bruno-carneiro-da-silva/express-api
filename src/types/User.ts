@@ -8,7 +8,7 @@ export interface IUser {
   emailCompany: string;
   phoneNumberCompany: string;
   addressCompany: string;
-  terms: boolean;
+  terms?: boolean;
   username?: string;
   password: string;
   role?: string;

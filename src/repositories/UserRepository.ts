@@ -54,7 +54,6 @@ class UsersRepository {
     emailCompany,
     phoneNumberCompany,
     addressCompany,
-    terms,
     password,
   }: IUser) {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -68,7 +67,6 @@ class UsersRepository {
         emailCompany,
         phoneNumberCompany,
         addressCompany,
-        terms,
         password: hashedPassword,
       },
     });

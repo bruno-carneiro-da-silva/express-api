@@ -39,7 +39,6 @@ export const store: RequestHandler = async (request, response) => {
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      terms,
       password,
     } = request.body;
     const addUserSchema = z.object({
@@ -55,7 +54,6 @@ export const store: RequestHandler = async (request, response) => {
         message: "Número de telefone inválido",
       }),
       addressCompany: z.string(),
-      terms: z.boolean().optional(),
       password: z.string(),
     });
 
@@ -84,8 +82,12 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
+      role: "admin",
     });
-    response.json(user);
+
+    const { password: _, ...userWithoutPassword } = user;
+
+    response.json(userWithoutPassword);
   } catch (error) {
     response.status(500).json({ error: "Erro ao criar usuário" });
   }
@@ -102,7 +104,6 @@ export const update: RequestHandler = async (request, response) => {
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      terms,
       password,
     } = request.body;
     const { id } = request.params;
@@ -120,7 +121,6 @@ export const update: RequestHandler = async (request, response) => {
         message: "Número de telefone inválido",
       }),
       addressCompany: z.string(),
-      terms: z.boolean().optional(),
       password: z.string(),
     });
 
@@ -153,7 +153,6 @@ export const update: RequestHandler = async (request, response) => {
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      terms,
       password,
     });
 

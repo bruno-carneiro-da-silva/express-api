@@ -10,7 +10,7 @@ class UsersRepository {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const users = await prisma.user.findMany({
       orderBy: {
-        username: direction,
+        emailAdmin: direction,
       },
     });
     return users;

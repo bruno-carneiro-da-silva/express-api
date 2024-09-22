@@ -28,7 +28,7 @@ export const login: RequestHandler = async (req, res) => {
   const refreshToken = auth.generateRefreshToken(body.data.emailAdmin);
   await UsersRepository.updateRefreshToken(user.id, refreshToken);
 
-  const { password, ...userWithoutPassword } = user;
+  const { password, refreshToken: _, ...userWithoutPassword } = user;
 
   res.json({
     accessToken: auth.generateToken(body.data.emailAdmin),

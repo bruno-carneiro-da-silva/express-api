@@ -9,9 +9,9 @@ const REFRESH_TOKEN_SECRET =
 
 export const validadeCredentials = async (
   password: string,
-  email: string
+  emailAdmin: string
 ): Promise<boolean> => {
-  const user = await UsersRepository.findByEmail(email);
+  const user = await UsersRepository.findByEmail(emailAdmin);
   if (!user) {
     return false;
   }
@@ -19,14 +19,14 @@ export const validadeCredentials = async (
   return isPasswordValid;
 };
 
-export const generateToken = (email: string) => {
-  const payload = { email };
+export const generateToken = (emailAdmin: string) => {
+  const payload = { emailAdmin };
   const options = { expiresIn: "15m" };
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
-export const generateRefreshToken = (email: string) => {
-  const payload = { email };
+export const generateRefreshToken = (emailAdmin: string) => {
+  const payload = { emailAdmin };
   const options = { expiresIn: "7d" }; // Refresh token expires in 7 days
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, options);
 };

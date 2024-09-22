@@ -89,7 +89,7 @@ export const store: RequestHandler = async (request, response) => {
 
     response.json(userWithoutPassword);
   } catch (error) {
-    response.status(500).json({ error: "Erro ao criar usuário" });
+    response.status(500).json({ error: error });
   }
 };
 

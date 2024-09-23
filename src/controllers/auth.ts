@@ -7,13 +7,18 @@ import { sendEmail } from "../services/twilio";
 
 export const login: RequestHandler = async (req, res) => {
   const loginSchema = z.object({
-    emailAdmin: z.string().email({ message: "Email inválido" }),
+    phoneNumberAdmin: z
+      .string()
+      .regex(/^\+?[1-9]\d{1,14}$/, { message: "Número de telefone inválido" }),
     password: z.string().min(8),
   });
   const body = loginSchema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByEmail(body.data.emailAdmin);
+  const user = await UsersRepository.findByPhoneNumber(
+    body.data.phoneNumberAdmin
+  );
+
   if (!user) {
     return res.status(403).json({ error: "Acesso negado" });
   }
@@ -22,17 +27,19 @@ export const login: RequestHandler = async (req, res) => {
     body.data.password,
     user.password
   );
+
+  console.log(isPasswordValid);
   if (!isPasswordValid) {
-    return res.status(403).json({ error: "Acesso negado" });
+    return res.status(403).json({ error: "Senha inválida, digite novamente" });
   }
 
-  const refreshToken = auth.generateRefreshToken(body.data.emailAdmin);
+  const refreshToken = auth.generateRefreshToken(body.data.phoneNumberAdmin);
   await UsersRepository.updateRefreshToken(user.id, refreshToken);
 
   const { password, refreshToken: _, ...userWithoutPassword } = user;
 
   res.json({
-    accessToken: auth.generateToken(body.data.emailAdmin),
+    accessToken: auth.generateToken(body.data.phoneNumberAdmin),
     user: userWithoutPassword,
   });
 };
@@ -71,7 +78,7 @@ export const sendVerificationCode: RequestHandler = async (req, res) => {
 
 export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
   const schema = z.object({
-    phoneNumber: z
+    phoneNumberAdmin: z
       .string()
       .regex(/^\+?[1-9]\d{1,14}$/, { message: "Número de telefone inválido" }),
     code: z.string().length(6),
@@ -80,7 +87,9 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
   const body = schema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByPhoneNumber(body.data.phoneNumber);
+  const user = await UsersRepository.findByPhoneNumber(
+    body.data.phoneNumberAdmin
+  );
   if (
     !user ||
     user.verificationCode !== body.data.code ||
@@ -94,7 +103,7 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(body.data.newPassword, 10);
   await UsersRepository.updatePasswordByPhoneNumber(
-    body.data.phoneNumber,
+    body.data.phoneNumberAdmin,
     hashedPassword
   );
 

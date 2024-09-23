@@ -135,14 +135,14 @@ class UsersRepository {
     return user;
   }
 
-  async updatePasswordByPhoneNumber(phoneNumber: string, newPassword: string) {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+  async updatePasswordByPhoneNumber(
+    phoneNumberAdmin: string,
+    newPassword: string
+  ) {
     const user = await prisma.user.update({
-      where: { phoneNumberAdmin: phoneNumber },
+      where: { phoneNumberAdmin: phoneNumberAdmin },
       data: {
-        password: hashedPassword,
-        verificationCode: null,
-        verificationCodeExpiresAt: null,
+        password: newPassword,
       },
     });
     return user;

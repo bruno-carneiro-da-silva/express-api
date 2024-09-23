@@ -11,7 +11,7 @@ model User {
   firstName          String   @default("")
   lastName           String   @default("")
   emailAdmin         String   @unique @default("")
-  phoneNumberAdmin   String   @default("")
+  phoneNumberAdmin   String   @unique @default("")
   password           String
   nameCompany        String   @default("")
   emailCompany       String   @default("")
@@ -20,6 +20,8 @@ model User {
   terms              Boolean? @default(false)
   role               String?  @default("")
   refreshToken       String?
+  verificationCode   String?
+  verificationCodeExpiresAt   DateTime?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   sales              Sale[]

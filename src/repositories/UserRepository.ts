@@ -45,6 +45,13 @@ class UsersRepository {
     return user;
   }
 
+  async findByPhoneNumber(phoneNumberAdmin: string) {
+    const user = await prisma.user.findUnique({
+      where: { phoneNumberAdmin: phoneNumberAdmin },
+    });
+    return user;
+  }
+
   async create({
     firstName,
     lastName,
@@ -112,6 +119,30 @@ class UsersRepository {
       where: { id },
       data: {
         refreshToken,
+      },
+    });
+    return user;
+  }
+
+  async updateVerificationCode(email: string, code: string, expiresAt: Date) {
+    const user = await prisma.user.update({
+      where: { emailAdmin: email },
+      data: {
+        verificationCode: code,
+        verificationCodeExpiresAt: expiresAt,
+      },
+    });
+    return user;
+  }
+
+  async updatePasswordByPhoneNumber(phoneNumber: string, newPassword: string) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const user = await prisma.user.update({
+      where: { phoneNumberAdmin: phoneNumber },
+      data: {
+        password: hashedPassword,
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
       },
     });
     return user;

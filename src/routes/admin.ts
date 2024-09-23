@@ -17,6 +17,9 @@ const router = Router();
 router.post("/login", auth.login);
 router.post("/refresh-token", auth.refreshToken);
 
+router.post("/send_code", auth.sendVerificationCode);
+router.post("/verify_password", auth.verifyCodeAndResetPassword);
+
 router.get("/suppliers", auth.validate, supplier.index);
 router.get("/suppliers/:id", auth.validate, supplier.show);
 router.post("/suppliers", auth.validate, supplier.store);

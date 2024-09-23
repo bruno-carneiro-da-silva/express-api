@@ -143,6 +143,8 @@ class UsersRepository {
       where: { phoneNumberAdmin: phoneNumberAdmin },
       data: {
         password: newPassword,
+        verificationCode: null,
+        verificationCodeExpiresAt: null,
       },
     });
     return user;

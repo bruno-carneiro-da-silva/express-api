@@ -36,12 +36,13 @@ class StockRepository {
     return stock;
   }
 
-  async create({ productId, capacity, qtd }: IStock) {
+  async create({ productId, capacity, qtd, minStock }: IStock) {
     const stock = await prisma.stock.create({
       data: {
         productId,
         capacity,
         qtd,
+        minStock,
       },
     });
     return stock;
@@ -53,7 +54,8 @@ class StockRepository {
       productId,
       capacity,
       qtd,
-    }: { productId: string; capacity: number; qtd: number }
+      minStock,
+    }: { productId: string; capacity: number; qtd: number; minStock: number }
   ) {
     const stock = await prisma.stock.update({
       where: { id },
@@ -61,6 +63,7 @@ class StockRepository {
         productId,
         capacity,
         qtd,
+        minStock,
       },
     });
     return stock;

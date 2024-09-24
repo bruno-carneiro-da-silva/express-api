@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import ProductRepository from "../repositories/ProductRepository";
+import StockRepository from "../repositories/StockRepository";
 import { z } from "zod";
 import CategoriesRepository from "../repositories/CategoriesRepository";
 
@@ -38,13 +39,14 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId } = request.body;
+    const { name, qtd, price, categoryId, minStock } = request.body;
 
     const addProductSchema = z.object({
       name: z.string(),
       qtd: z.number(),
       price: z.number(),
       categoryId: z.string(),
+      minStock: z.number(),
     });
 
     const body = addProductSchema.safeParse(request.body);
@@ -70,6 +72,14 @@ export const store: RequestHandler = async (request, response) => {
       price,
       categoryId,
     });
+
+    await StockRepository.create({
+      productId: product.id,
+      capacity: 100,
+      qtd,
+      minStock,
+    });
+
     response.json(product);
   } catch (error) {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
@@ -78,7 +88,7 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId } = request.body;
+    const { name, qtd, price, categoryId, minStock } = request.body;
     const { id } = request.params;
     const validateIdSchema = z.object({
       id: z.string(),
@@ -88,6 +98,7 @@ export const update: RequestHandler = async (request, response) => {
       qtd: z.number(),
       price: z.number(),
       categoryId: z.string(),
+      minStock: z.number(),
     });
     const idParsed = validateIdSchema.safeParse(request.params);
     const body = updateProductSchema.safeParse(request.body);
@@ -120,7 +131,9 @@ export const update: RequestHandler = async (request, response) => {
       qtd,
       price,
       categoryId,
+      minStock, 
     });
+
     response.json(product);
   } catch (error) {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });

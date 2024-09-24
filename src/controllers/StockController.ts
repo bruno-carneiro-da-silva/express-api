@@ -39,11 +39,12 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { productId, capacity, qtd } = request.body;
+    const { productId, capacity, qtd, minStock } = request.body;
     const addStockSchema = z.object({
       productId: z.string(),
       capacity: z.number(),
       qtd: z.number(),
+      minStock: z.number(),
     });
 
     const body = addStockSchema.safeParse(request.body);
@@ -53,6 +54,7 @@ export const store: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
     }
+
     const productIdExists = await ProductRepository.findById(productId);
     const stockExists = await StockRepository.findByProductId(productId);
 
@@ -63,13 +65,14 @@ export const store: RequestHandler = async (request, response) => {
     if (stockExists) {
       return response
         .status(400)
-        .json({ error: "O estoque desse produto ja existe" });
+        .json({ error: "O estoque desse produto já existe" });
     }
 
     const stock = await StockRepository.create({
       productId,
       capacity,
       qtd,
+      minStock,
     });
     response.json(stock);
   } catch (error) {
@@ -79,13 +82,14 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { productId, capacity, qtd } = request.body;
+    const { productId, capacity, qtd, minStock } = request.body;
     const { id } = request.params;
     const updateStockIdSchema = z.string();
     const updateStockSchema = z.object({
       productId: z.string(),
       capacity: z.number(),
       qtd: z.number(),
+      minStock: z.number(),
     });
     const idSchema = updateStockIdSchema.safeParse(id);
     const body = updateStockSchema.safeParse(request.body);
@@ -116,6 +120,7 @@ export const update: RequestHandler = async (request, response) => {
       productId,
       capacity,
       qtd,
+      minStock,
     });
     response.json(stock);
   } catch (error) {

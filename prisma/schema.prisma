@@ -94,6 +94,7 @@ model Stock {
   productId  String @unique
   capacity   Int
   qtd        Int
+  minStock   Int
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   product    Product  @relation(fields: [productId], references: [id])

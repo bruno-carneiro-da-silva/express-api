@@ -64,6 +64,18 @@ class ProductRepository {
     return product;
   }
 
+  async checkStockAndNotify(productId: string) {
+    const stock = await prisma.stock.findUnique({
+      where: { productId },
+    });
+
+    if (stock && stock.qtd <= stock.minStock) {
+      // Lógica para notificar o usuário
+      console.log(`Produto ${productId} está no estoque mínimo.`);
+      // Aqui você pode enviar um email, uma notificação, etc.
+    }
+  }
+
   async update(
     id: string,
     {
@@ -71,7 +83,14 @@ class ProductRepository {
       qtd,
       price,
       categoryId,
-    }: { name: string; qtd: number; price: number; categoryId?: string }
+      minStock, // Adicionando o campo minStock
+    }: {
+      name: string;
+      qtd: number;
+      price: number;
+      categoryId?: string;
+      minStock: number;
+    }
   ) {
     const product = await prisma.product.update({
       where: { id },
@@ -82,6 +101,17 @@ class ProductRepository {
         categoryId,
       },
     });
+
+    await prisma.stock.update({
+      where: { productId: id },
+      data: {
+        qtd,
+        minStock, // Atualizando o campo minStock
+      },
+    });
+
+    await this.checkStockAndNotify(id);
+
     return product;
   }
 
@@ -89,6 +119,9 @@ class ProductRepository {
     const product = await prisma.product.delete({
       where: { id },
     });
+
+    await this.checkStockAndNotify(id);
+
     return product;
   }
 }

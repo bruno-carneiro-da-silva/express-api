@@ -40,6 +40,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
+      planId,
     } = request.body;
     const addUserSchema = z.object({
       firstName: z.string(),
@@ -55,6 +56,7 @@ export const store: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       password: z.string(),
+      planId: z.string().uuid(),
     });
 
     const body = addUserSchema.safeParse(request.body);
@@ -82,6 +84,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
+      planId,
       role: "admin",
     });
 
@@ -105,6 +108,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
+      planId,
     } = request.body;
     const { id } = request.params;
 
@@ -122,6 +126,7 @@ export const update: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       password: z.string(),
+      planId: z.string().uuid(),
     });
 
     const body = updateUserSchema.safeParse(request.body);
@@ -154,6 +159,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
+      planId,
     });
 
     const { password: _, ...userWithoutPassword } = user;

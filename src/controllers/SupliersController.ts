@@ -30,7 +30,9 @@ export const show: RequestHandler = async (request, response) => {
     }
     response.json(supplier);
   } catch (error) {
-    response.status(500).json({ error: "Erro interno, tente mais tarde" });
+    response
+      .status(500)
+      .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
   }
 };
 

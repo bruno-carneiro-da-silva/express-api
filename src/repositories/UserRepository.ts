@@ -62,6 +62,7 @@ class UsersRepository {
     phoneNumberCompany,
     addressCompany,
     password,
+    planId,
   }: IUser) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
@@ -75,6 +76,7 @@ class UsersRepository {
         phoneNumberCompany,
         addressCompany,
         password: hashedPassword,
+        planId,
       },
     });
     return user;
@@ -91,8 +93,8 @@ class UsersRepository {
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      terms,
       password,
+      planId,
     }: IUser
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -107,8 +109,8 @@ class UsersRepository {
         emailCompany,
         phoneNumberCompany,
         addressCompany,
-        terms,
         password: hashedPassword,
+        planId,
       },
     });
     return user;

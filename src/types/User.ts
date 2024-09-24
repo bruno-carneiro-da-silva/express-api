@@ -12,6 +12,7 @@ export interface IUser {
   username?: string;
   password: string;
   role?: string;
+  planId?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

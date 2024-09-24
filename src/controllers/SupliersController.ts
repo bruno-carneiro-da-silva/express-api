@@ -36,7 +36,18 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, address, cnpj, corporateReason, email, phone } = request.body;
+    const {
+      name,
+      address,
+      cnpj,
+      corporateReason,
+      email,
+      phone,
+      lastName,
+      dateOfBirth,
+      nationality,
+      niche,
+    } = request.body;
 
     const supplierSchema = z.object({
       name: z.string(),
@@ -45,6 +56,10 @@ export const store: RequestHandler = async (request, response) => {
       corporateReason: z.string(),
       email: z.string().email(),
       phone: z.string(),
+      lastName: z.string(),
+      dateOfBirth: z.date(),
+      nationality: z.string(),
+      niche: z.string(),
     });
 
     const body = supplierSchema.safeParse(request.body);
@@ -73,16 +88,33 @@ export const store: RequestHandler = async (request, response) => {
       phone,
       corporateReason,
       email,
+      lastName,
+      dateOfBirth,
+      nationality,
+      niche,
     });
     response.json(supplier);
   } catch (error) {
-    response.status(500).json({ error: "Erro interno, tente mais tarde" });
+    response
+      .status(500)
+      .json({ error: "Erro ao criar o fornecedor, tente mais tarde" });
   }
 };
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, cnpj, address, corporateReason } = request.body;
+    const {
+      name,
+      address,
+      cnpj,
+      corporateReason,
+      email,
+      phone,
+      lastName,
+      dateOfBirth,
+      nationality,
+      niche,
+    } = request.body;
     const { id } = request.params;
 
     const updateSupplierSchema = z.object({
@@ -92,6 +124,10 @@ export const update: RequestHandler = async (request, response) => {
       cnpj: z.string(),
       address: z.string(),
       corporateReason: z.string(),
+      lastName: z.string(),
+      dateOfBirth: z.date(),
+      nationality: z.string(),
+      niche: z.string(),
     });
 
     const body = updateSupplierSchema.safeParse(request.body);
@@ -120,10 +156,16 @@ export const update: RequestHandler = async (request, response) => {
       cnpj,
       address,
       corporateReason,
+      lastName,
+      dateOfBirth,
+      nationality,
+      niche,
     });
     response.json(supplier);
   } catch (error) {
-    response.status(500).json({ error: "Erro interno, tente mais tarde" });
+    response
+      .status(500)
+      .json({ error: "Erro ao atualizar o fornecedor, tente mais tarde" });
   }
 };
 
@@ -146,6 +188,8 @@ export const deleteSupplier: RequestHandler = async (request, response) => {
     await SupplierRepository.delete(id);
     response.sendStatus(204);
   } catch (error) {
-    response.status(500).json({ error: "Erro interno, tente mais tarde" });
+    response
+      .status(500)
+      .json({ error: "Erro ao tentar deletar o fornecedor, tente mais tarde" });
   }
 };

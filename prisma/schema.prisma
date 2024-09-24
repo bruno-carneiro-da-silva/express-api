@@ -1,6 +1,7 @@
 generator client {
   provider = "prisma-client-js"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -25,6 +26,41 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
   sales              Sale[]
+  planId             String?
+  plan               Plan?    @relation(fields: [planId], references: [id])
+}
+
+model Plan {
+  id          String       @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  users       User[]
+  features    Feature[]
+  prices      Price[]
+}
+
+model Feature {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  planId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  plan        Plan     @relation(fields: [planId], references: [id])
+}
+
+model Price {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  benefits    String?
+  planId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  plan        Plan     @relation(fields: [planId], references: [id])
 }
 
 model Category {
@@ -124,7 +160,7 @@ model SoldItem {
   qtd       Int
   price     Float
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
   sale      Sale     @relation(fields: [saleId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
 }
@@ -138,7 +174,7 @@ model Transaction {
   totalPrice  Float
   selledPrice Float
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
   product     Product  @relation(fields: [productId], references: [id])
   employee    Employee @relation(fields: [employeeId], references: [id])
   supplier    Supplier @relation(fields: [supplierCnpj], references: [cnpj])

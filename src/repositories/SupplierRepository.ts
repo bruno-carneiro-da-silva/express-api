@@ -30,6 +30,10 @@ class SupplierRepository {
     phone,
     corporateReason,
     email,
+    lastName,
+    dateOfBirth,
+    nationality,
+    niche,
   }: ISupplier) {
     const supplier = await prisma.supplier.create({
       data: {
@@ -39,6 +43,10 @@ class SupplierRepository {
         cnpj,
         corporateReason,
         email,
+        lastName,
+        dateOfBirth,
+        nationality,
+        niche,
       },
     });
     return supplier;

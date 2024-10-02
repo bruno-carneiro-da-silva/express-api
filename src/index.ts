@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import https from "https";
 import fs from "fs";
 import http from "http";
@@ -15,6 +16,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 10000, 
+  max: 10,
+  message: "Muitas requisições feitas pelo usuário, tente novamente mais tarde.",
+});
+
+app.use(limiter);
 
 app.all("*", requestInterceptor);
 app.use("/admin", adminRoutes);

@@ -12,7 +12,7 @@ import { requestInterceptor } from "./utils/requestInterceptor";
 
 const app = express();
 
-const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:3000";
+const allowedOrigin = process.env.ALLOWED_ORIGIN || process.env.LOCALHOST;
 
 const corsOptions = {
   origin: allowedOrigin,

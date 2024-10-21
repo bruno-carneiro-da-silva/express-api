@@ -16,7 +16,7 @@ app.set("trust proxy", 1);
 
 const allowedOrigin = [
   "https://inventorygenius.vercel.app",
-  "http://localhost:3000",
+  "http://localhost:5173",
 ];
 
 const corsOptions = {

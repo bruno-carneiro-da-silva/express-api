@@ -73,7 +73,13 @@ END $$;
 ALTER TABLE "Transaction" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- DropTable
-DROP TABLE "User";
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='User') THEN
+        DROP TABLE "User";
+    END IF;
+END $$;
+
 
 -- CreateTable
 CREATE TABLE "Company" (

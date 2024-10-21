@@ -70,30 +70,6 @@ CREATE TABLE "Company" (
 
     CONSTRAINT "Company_pkey" PRIMARY KEY ("id")
 );
--- CreateTable
-CREATE TABLE "Feature" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "planId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Feature_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Price" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "benefits" TEXT,
-    "planId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Price_pkey" PRIMARY KEY ("id")
-);
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Company_emailAdmin_key" ON "Company"("emailAdmin");

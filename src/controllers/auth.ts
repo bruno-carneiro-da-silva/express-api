@@ -4,6 +4,7 @@ import * as auth from "../services/auth";
 import UsersRepository from "../repositories/UserRepository";
 import bcrypt from "bcrypt";
 import { sendEmail } from "../services/twilio";
+import jwt from "jsonwebtoken";
 
 export const login: RequestHandler = async (req, res) => {
   const loginSchema = z.object({
@@ -28,18 +29,22 @@ export const login: RequestHandler = async (req, res) => {
     user.password
   );
 
-  console.log(isPasswordValid);
   if (!isPasswordValid) {
     return res.status(403).json({ error: "Senha inválida, digite novamente" });
   }
 
-  const refreshToken = auth.generateRefreshToken(body.data.phoneNumberAdmin);
-  await UsersRepository.updateRefreshToken(user.id, refreshToken);
+  const refreshToken = auth.generateRefreshToken(
+    user.id,
+    body.data.phoneNumberAdmin
+  );
+  if (user.id) {
+    await UsersRepository.updateRefreshToken(user.id, refreshToken);
+  }
 
   const { password, refreshToken: _, ...userWithoutPassword } = user;
 
   res.json({
-    accessToken: auth.generateToken(body.data.phoneNumberAdmin),
+    accessToken: auth.generateToken(user.id, body.data.phoneNumberAdmin),
     user: userWithoutPassword,
   });
 };
@@ -112,21 +117,40 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
 
 export const validate: RequestHandler = async (req, res, next) => {
   const authHeader = req.headers.authorization;
+
   if (!authHeader) {
-    return res.status(403).json({ error: "Acesso negado" });
+    return res
+      .status(403)
+      .json({ error: "O parâmetro authorization no header está faltando" });
   }
+
   const token = authHeader.split(" ")[1];
-  if (!auth.validateToken(token)) {
+
+  if (!token) {
+    return res.status(403).json({ error: "Token não achado" });
+  }
+
+  const decoded = jwt.decode(token);
+
+  if (!decoded) {
+    return res.status(403).json({ error: "Token inválido" });
+  }
+
+  const isValidToken = auth.validateToken(token);
+  if (!isValidToken) {
     const user = await UsersRepository.findByAccessToken(token);
     if (!user || !auth.validateRefreshToken(user?.refreshToken ?? "")) {
-      return res.status(403).json({ error: "Acesso negado" });
+      return res.status(403).json({ error: "Refresh token inválido" });
     }
+
     const newAccessToken = auth.getNewAccessToken(user?.refreshToken ?? "");
     if (!newAccessToken) {
-      return res.status(403).json({ error: "Acesso negado" });
+      return res.status(403).json({ error: "Não foi possível gerar o token" });
     }
+
     res.setHeader("Authorization", `Bearer ${newAccessToken}`);
   }
+
   next();
 };
 
@@ -142,6 +166,6 @@ export const refreshToken: RequestHandler = async (req, res) => {
     return res.status(403).json({ error: "Acesso negado" });
   }
 
-  const newAccessToken = auth.generateToken(user.emailAdmin);
+  const newAccessToken = auth.generateToken(user.id, user.phoneNumberAdmin);
   res.json({ accessToken: newAccessToken });
 };

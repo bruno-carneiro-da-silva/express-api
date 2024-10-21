@@ -19,24 +19,32 @@ export const validadeCredentials = async (
   return isPasswordValid;
 };
 
-export const generateToken = (emailAdmin: string) => {
-  const payload = { emailAdmin };
+export const generateToken = (userId: string, phoneNumberAdmin: string) => {
+  const payload = { userId, phoneNumberAdmin };
   const options = { expiresIn: "15m" };
   return jwt.sign(payload, JWT_SECRET, options);
 };
 
-export const generateRefreshToken = (emailAdmin: string) => {
-  const payload = { emailAdmin };
+export const generateRefreshToken = (
+  userId: string,
+  phoneNumberAdmin: string
+) => {
+  const payload = { userId, phoneNumberAdmin };
   const options = { expiresIn: "7d" }; // Refresh token expires in 7 days
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, options);
 };
 
-export const validateToken = (token: string): boolean => {
+export const validateToken = (
+  token: string
+): { valid: boolean; reason?: string } => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return !!decoded;
-  } catch (err) {
-    return false;
+    return { valid: true };
+  } catch (err: any) {
+    if (err.name === "TokenExpiredError") {
+      return { valid: false, reason: "expired" };
+    }
+    return { valid: false, reason: "invalid" };
   }
 };
 
@@ -52,9 +60,10 @@ export const validateRefreshToken = (token: string): boolean => {
 export const getNewAccessToken = (refreshToken: string): string | null => {
   try {
     const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET) as {
-      username: string;
+      userId: string;
+      phoneNumberAdmin: string;
     };
-    return generateToken(decoded.username);
+    return generateToken(decoded.userId, decoded.phoneNumberAdmin);
   } catch (err) {
     return null;
   }

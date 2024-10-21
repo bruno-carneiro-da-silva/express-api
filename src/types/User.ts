@@ -11,7 +11,7 @@ export interface IUser {
   terms?: boolean;
   username?: string;
   password: string;
-  role?: string;
+  role?: string[];
   planId?: string;
   createdAt?: Date;
   updatedAt?: Date;

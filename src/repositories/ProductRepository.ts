@@ -14,6 +14,7 @@ class ProductRepository {
         stock: true,
         soldItems: true,
         transactions: true,
+        photos: true,
       },
     });
     return products;
@@ -27,6 +28,7 @@ class ProductRepository {
         stock: true,
         soldItems: true,
         transactions: true,
+        photos: true,
       },
     });
     return product;
@@ -40,6 +42,7 @@ class ProductRepository {
         stock: true,
         soldItems: true,
         transactions: true,
+        photos: true,
       },
     });
     return products;
@@ -52,13 +55,29 @@ class ProductRepository {
     return product;
   }
 
-  async create({ name, qtd, price, categoryId }: IProduct) {
+  async create({
+    name,
+    qtd,
+    description,
+    size,
+    price,
+    categoryId,
+    photos,
+  }: IProduct) {
     const product = await prisma.product.create({
       data: {
         name,
         qtd,
+        description,
+        size,
         price,
         categoryId,
+        photos: {
+          create: photos.map((url: string) => ({ url })),
+        },
+      },
+      include: {
+        photos: true,
       },
     });
     return product;
@@ -82,31 +101,58 @@ class ProductRepository {
       name,
       qtd,
       price,
+      description,
+      size,
+      photos,
       categoryId,
-      minStock, // Adicionando o campo minStock
-    }: {
-      name: string;
-      qtd: number;
-      price: number;
-      categoryId?: string;
-      minStock: number;
-    }
+      minStock,
+    }: IProduct
   ) {
+
+    const existingPhotos = await prisma.photo.findMany({
+      where: { productId: id },
+    });
+
+    const photosToRemove = existingPhotos.filter(
+      (existingPhoto) => !photos.includes(existingPhoto.url)
+    );
+
+    const photosToAdd = photos.filter(
+      (url) =>
+        !existingPhotos.some((existingPhoto) => existingPhoto.url === url)
+    );
+
     const product = await prisma.product.update({
       where: { id },
       data: {
         name,
         qtd,
         price,
+        description,
+        size,
+        photos: {
+          deleteMany: {},
+          create: photos.map((url: string) => ({ url })),
+        },
         categoryId,
       },
+    });
+
+    await prisma.photo.deleteMany({
+      where: {
+        id: { in: photosToRemove.map((photo) => photo.id) },
+      },
+    });
+
+    await prisma.photo.createMany({
+      data: photosToAdd.map((url) => ({ url, productId: id })),
     });
 
     await prisma.stock.update({
       where: { productId: id },
       data: {
         qtd,
-        minStock, // Atualizando o campo minStock
+        minStock,
       },
     });
 

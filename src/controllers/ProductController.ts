@@ -39,13 +39,26 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId, minStock, capacity } = request.body;
+    const {
+      name,
+      description,
+      size,
+      qtd,
+      price,
+      categoryId,
+      photos,
+      minStock,
+      capacity,
+    } = request.body;
 
     const addProductSchema = z.object({
       name: z.string(),
+      description: z.string(),
+      size: z.string(),
       qtd: z.number(),
       price: z.number(),
       categoryId: z.string(),
+      photos: z.array(z.string()),
       minStock: z.number(),
       capacity: z.number(),
     });
@@ -71,9 +84,12 @@ export const store: RequestHandler = async (request, response) => {
 
     const product = await ProductRepository.create({
       name,
+      description,
+      size,
       qtd,
       price,
       categoryId,
+      photos,
     });
 
     await StockRepository.create({
@@ -91,7 +107,17 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId, capacity, minStock } = request.body;
+    const {
+      name,
+      qtd,
+      description,
+      size,
+      photos,
+      price,
+      categoryId,
+      capacity,
+      minStock,
+    } = request.body;
     const { id } = request.params;
     const validateIdSchema = z.object({
       id: z.string().uuid("ID inválido"),
@@ -99,7 +125,10 @@ export const update: RequestHandler = async (request, response) => {
     const updateProductSchema = z.object({
       name: z.string(),
       qtd: z.number(),
+      description: z.string(),
+      size: z.string(),
       price: z.number(),
+      photos: z.array(z.string()),
       categoryId: z.string(),
       minStock: z.number(),
       capacity: z.number(),
@@ -134,6 +163,9 @@ export const update: RequestHandler = async (request, response) => {
       name,
       qtd,
       price,
+      description,
+      size,
+      photos,
       categoryId,
       minStock,
     });

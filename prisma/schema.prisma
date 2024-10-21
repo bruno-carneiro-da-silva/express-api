@@ -139,6 +139,8 @@ model Supplier {
 model Product {
   id         String   @id @default(uuid())
   name       String
+  description String
+  size       String
   qtd        Int
   price      Float
   categoryId String
@@ -148,6 +150,16 @@ model Product {
   stock      Stock?
   soldItems  SoldItem[]
   transactions Transaction[]
+  photos     Photo[]
+}
+
+model Photo {
+  id         String   @id @default(uuid())
+  url        String
+  productId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
 }
 
 model Stock {

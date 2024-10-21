@@ -51,16 +51,14 @@ class StockRepository {
   async update(
     id: string,
     {
-      productId,
       capacity,
       qtd,
       minStock,
-    }: { productId: string; capacity: number; qtd: number; minStock: number }
+    }: { capacity: number; qtd: number; minStock: number }
   ) {
     const stock = await prisma.stock.update({
       where: { id },
       data: {
-        productId,
         capacity,
         qtd,
         minStock,

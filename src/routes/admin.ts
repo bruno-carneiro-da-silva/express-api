@@ -22,6 +22,7 @@ router.post("/verify_password", auth.verifyCodeAndResetPassword);
 
 router.get("/suppliers", auth.validate, supplier.index);
 router.get("/suppliers/:id", auth.validate, supplier.show);
+router.get("/suppliers/:cnpj", auth.validate, supplier.showByCnpj);
 router.post("/suppliers", auth.validate, supplier.store);
 router.put("/suppliers/:id", auth.validate, supplier.update);
 router.delete("/suppliers/:id", auth.validate, supplier.deleteSupplier);
@@ -53,7 +54,6 @@ router.get("/users/:id", validateId, auth.validate, user.show);
 router.post(
   "/users",
   sanitizeBody([
-    "username",
     "firstName",
     "lastName",
     "emailAdmin",
@@ -63,7 +63,6 @@ router.post(
     "emailCompany",
     "phoneNumberCompany",
     "addressCompany",
-    "terms",
     "role",
   ]),
   validateUser,
@@ -83,7 +82,6 @@ router.put(
     "emailCompany",
     "phoneNumberCompany",
     "addressCompany",
-    "terms",
     "role",
   ]),
   validateUser,

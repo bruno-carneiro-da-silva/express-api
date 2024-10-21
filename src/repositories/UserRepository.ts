@@ -12,6 +12,30 @@ class UsersRepository {
       orderBy: {
         emailAdmin: direction,
       },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        emailAdmin: true,
+        phoneNumberAdmin: true,
+        nameCompany: true,
+        emailCompany: true,
+        phoneNumberCompany: true,
+        addressCompany: true,
+        terms: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+        planId: true,
+        password: false,
+        refreshToken: false,
+        verificationCode: false,
+        verificationCodeExpiresAt: false,
+      },
     });
     return users;
   }
@@ -19,6 +43,9 @@ class UsersRepository {
   async findById(id: string) {
     const user = await prisma.user.findUnique({
       where: { id },
+      include: {
+        role: true,
+      },
     });
     return user;
   }
@@ -26,6 +53,9 @@ class UsersRepository {
   async findByEmail(email: string) {
     const user = await prisma.user.findUnique({
       where: { emailAdmin: email },
+      include: {
+        role: true,
+      },
     });
     return user;
   }
@@ -34,6 +64,9 @@ class UsersRepository {
     const decoded = jwt.decode(accessToken) as { email: string };
     const user = await prisma.user.findUnique({
       where: { emailAdmin: decoded.email },
+      include: {
+        role: true,
+      },
     });
     return user;
   }
@@ -41,6 +74,9 @@ class UsersRepository {
   async findByRefreshToken(refreshToken: string) {
     const user = await prisma.user.findFirst({
       where: { refreshToken },
+      include: {
+        role: true,
+      },
     });
     return user;
   }
@@ -48,6 +84,9 @@ class UsersRepository {
   async findByPhoneNumber(phoneNumberAdmin: string) {
     const user = await prisma.user.findUnique({
       where: { phoneNumberAdmin: phoneNumberAdmin },
+      include: {
+        role: true,
+      },
     });
     return user;
   }
@@ -62,8 +101,8 @@ class UsersRepository {
     phoneNumberCompany,
     addressCompany,
     password,
-    planId,
-  }: IUser) {
+    roleId,
+  }: IUser & { roleId: number }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
@@ -76,7 +115,7 @@ class UsersRepository {
         phoneNumberCompany,
         addressCompany,
         password: hashedPassword,
-        planId,
+        roleId,
       },
     });
     return user;
@@ -94,8 +133,8 @@ class UsersRepository {
       phoneNumberCompany,
       addressCompany,
       password,
-      planId,
-    }: IUser
+      roleId,
+    }: IUser & { roleId: number }
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.update({
@@ -110,7 +149,7 @@ class UsersRepository {
         phoneNumberCompany,
         addressCompany,
         password: hashedPassword,
-        planId,
+        roleId,
       },
     });
     return user;
@@ -141,10 +180,11 @@ class UsersRepository {
     phoneNumberAdmin: string,
     newPassword: string
   ) {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const user = await prisma.user.update({
       where: { phoneNumberAdmin: phoneNumberAdmin },
       data: {
-        password: newPassword,
+        password: hashedPassword,
         verificationCode: null,
         verificationCodeExpiresAt: null,
       },

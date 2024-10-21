@@ -11,6 +11,15 @@ class SupplierRepository {
       },
       include: {
         transactions: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            emailAdmin: true,
+            phoneNumberAdmin: true,
+          },
+        },
       },
     });
     return suppliers;
@@ -19,6 +28,18 @@ class SupplierRepository {
   async listOne(id: string) {
     const supplier = await prisma.supplier.findUnique({
       where: { id },
+      include: {
+        transactions: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            emailAdmin: true,
+            phoneNumberAdmin: true,
+          },
+        },
+      },
     });
     return supplier;
   }
@@ -27,6 +48,10 @@ class SupplierRepository {
     name,
     address,
     cnpj,
+    city,
+    photo,
+    startContractDate,
+    endContractDate,
     phone,
     corporateReason,
     email,
@@ -34,19 +59,29 @@ class SupplierRepository {
     dateOfBirth,
     nationality,
     niche,
-  }: ISupplier) {
+    userId,
+  }: ISupplier & { userId: string }) {
     const supplier = await prisma.supplier.create({
       data: {
         name,
         address,
         phone,
         cnpj,
+        city,
+        photo,
+        startContractDate,
+        endContractDate,
         corporateReason,
         email,
         lastName,
         dateOfBirth,
         nationality,
         niche,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
     return supplier;
@@ -58,6 +93,7 @@ class SupplierRepository {
     });
     return supplier;
   }
+
   async findByEmail(email: string) {
     const supplier = await prisma.supplier.findUnique({
       where: { email },
@@ -67,17 +103,46 @@ class SupplierRepository {
 
   async update(
     id: string,
-    { name, email, phone, cnpj, address, corporateReason }: ISupplier
+    {
+      name,
+      address,
+      cnpj,
+      city,
+      photo,
+      startContractDate,
+      endContractDate,
+      phone,
+      corporateReason,
+      email,
+      lastName,
+      dateOfBirth,
+      nationality,
+      niche,
+      userId,
+    }: ISupplier & { userId: string }
   ) {
     const supplier = await prisma.supplier.update({
       where: { id },
       data: {
         name,
-        email,
+        address,
         phone,
         cnpj,
-        address,
+        city,
+        photo,
+        startContractDate,
+        endContractDate,
         corporateReason,
+        email,
+        lastName,
+        dateOfBirth,
+        nationality,
+        niche,
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
     return supplier;

@@ -40,7 +40,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
-      planId,
+      roleId,
     } = request.body;
     const addUserSchema = z.object({
       firstName: z.string(),
@@ -56,7 +56,6 @@ export const store: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       password: z.string(),
-      planId: z.string().uuid(),
     });
 
     const body = addUserSchema.safeParse(request.body);
@@ -73,7 +72,7 @@ export const store: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Esse email já está cadastrado" });
     }
-
+    const defaultRoleId = 1;
     const user = await UsersRepository.create({
       firstName,
       lastName,
@@ -84,8 +83,7 @@ export const store: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
-      planId,
-      role: "admin",
+      roleId: roleId || defaultRoleId,
     });
 
     const { password: _, ...userWithoutPassword } = user;
@@ -108,7 +106,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
-      planId,
+      roleId,
     } = request.body;
     const { id } = request.params;
 
@@ -126,7 +124,6 @@ export const update: RequestHandler = async (request, response) => {
       }),
       addressCompany: z.string(),
       password: z.string(),
-      planId: z.string().uuid(),
     });
 
     const body = updateUserSchema.safeParse(request.body);
@@ -159,7 +156,7 @@ export const update: RequestHandler = async (request, response) => {
       phoneNumberCompany,
       addressCompany,
       password,
-      planId,
+      roleId,
     });
 
     const { password: _, ...userWithoutPassword } = user;

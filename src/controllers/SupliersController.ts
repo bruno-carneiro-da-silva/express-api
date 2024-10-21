@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import SupplierRepository from "../repositories/SupplierRepository";
 import { z } from "zod";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 export const index: RequestHandler = async (request, response) => {
   try {
@@ -36,6 +38,30 @@ export const show: RequestHandler = async (request, response) => {
   }
 };
 
+export const showByCnpj: RequestHandler = async (request, response) => {
+  try {
+    const { cnpj } = request.params;
+    const cnpjSchema = z.string();
+
+    const body = cnpjSchema.safeParse(cnpj);
+
+    if (!body.success) {
+      return response.status(400).json({ error: "CNPJ inválido" });
+    }
+
+    const supplier = await SupplierRepository.findByDoc(cnpj);
+
+    if (!supplier) {
+      return response.status(404).json({ error: "Fornecedor não existe" });
+    }
+    response.json(supplier);
+  } catch (error) {
+    response
+      .status(500)
+      .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
+  }
+};
+
 export const store: RequestHandler = async (request, response) => {
   try {
     const {
@@ -49,6 +75,10 @@ export const store: RequestHandler = async (request, response) => {
       dateOfBirth,
       nationality,
       niche,
+      city,
+      photo,
+      startContractDate,
+      endContractDate,
     } = request.body;
 
     const supplierSchema = z.object({
@@ -59,9 +89,22 @@ export const store: RequestHandler = async (request, response) => {
       email: z.string().email(),
       phone: z.string(),
       lastName: z.string(),
-      dateOfBirth: z.date(),
+      dateOfBirth: z.preprocess((arg) => {
+        if (typeof arg === "string" || arg instanceof Date)
+          return new Date(arg);
+      }, z.date()),
       nationality: z.string(),
       niche: z.string(),
+      city: z.string(),
+      photo: z.string(),
+      startContractDate: z.preprocess((arg) => {
+        if (typeof arg === "string" || arg instanceof Date)
+          return new Date(arg);
+      }, z.date()),
+      endContractDate: z.preprocess((arg) => {
+        if (typeof arg === "string" || arg instanceof Date)
+          return new Date(arg);
+      }, z.date()),
     });
 
     const body = supplierSchema.safeParse(request.body);
@@ -83,20 +126,37 @@ export const store: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "Este email já está em uso" });
     }
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const supplier = await SupplierRepository.create({
       name,
       address,
       cnpj,
-      phone,
       corporateReason,
       email,
+      phone,
       lastName,
       dateOfBirth,
       nationality,
       niche,
+      city,
+      photo,
+      startContractDate,
+      endContractDate,
+      userId: decoded.userId,
     });
-    response.json(supplier);
+
+    return response.status(201).json(supplier);
   } catch (error) {
+    console.error(error);
     response
       .status(500)
       .json({ error: "Erro ao criar o fornecedor, tente mais tarde" });
@@ -116,6 +176,10 @@ export const update: RequestHandler = async (request, response) => {
       dateOfBirth,
       nationality,
       niche,
+      city,
+      photo,
+      startContractDate,
+      endContractDate,
     } = request.body;
     const { id } = request.params;
 
@@ -130,6 +194,10 @@ export const update: RequestHandler = async (request, response) => {
       dateOfBirth: z.date(),
       nationality: z.string(),
       niche: z.string(),
+      city: z.string(),
+      photo: z.string(),
+      startContractDate: z.date(),
+      endContractDate: z.date(),
     });
 
     const body = updateSupplierSchema.safeParse(request.body);
@@ -151,6 +219,17 @@ export const update: RequestHandler = async (request, response) => {
     if (emailExists && emailExists.id !== id) {
       return response.status(400).json({ error: "Este email já está em uso" });
     }
+
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const supplier = await SupplierRepository.update(id, {
       name,
       email,
@@ -162,6 +241,11 @@ export const update: RequestHandler = async (request, response) => {
       dateOfBirth,
       nationality,
       niche,
+      city,
+      photo,
+      startContractDate,
+      endContractDate,
+      userId: decoded.userId,
     });
     response.json(supplier);
   } catch (error) {

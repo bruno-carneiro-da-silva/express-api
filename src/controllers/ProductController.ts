@@ -39,7 +39,7 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId, minStock } = request.body;
+    const { name, qtd, price, categoryId, minStock, capacity } = request.body;
 
     const addProductSchema = z.object({
       name: z.string(),
@@ -47,6 +47,7 @@ export const store: RequestHandler = async (request, response) => {
       price: z.number(),
       categoryId: z.string(),
       minStock: z.number(),
+      capacity: z.number(),
     });
 
     const body = addProductSchema.safeParse(request.body);
@@ -56,7 +57,9 @@ export const store: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Existem campos não preenchidos" });
     }
+
     const categoryExists = await CategoriesRepository.listOne(categoryId);
+
     const productExists = await ProductRepository.findByName(name);
     if (productExists) {
       return response.status(400).json({ error: "Esse produto já existe" });
@@ -75,7 +78,7 @@ export const store: RequestHandler = async (request, response) => {
 
     await StockRepository.create({
       productId: product.id,
-      capacity: 100,
+      capacity,
       qtd,
       minStock,
     });
@@ -88,10 +91,10 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, qtd, price, categoryId, minStock } = request.body;
+    const { name, qtd, price, categoryId, capacity, minStock } = request.body;
     const { id } = request.params;
     const validateIdSchema = z.object({
-      id: z.string(),
+      id: z.string().uuid("ID inválido"),
     });
     const updateProductSchema = z.object({
       name: z.string(),
@@ -99,6 +102,7 @@ export const update: RequestHandler = async (request, response) => {
       price: z.number(),
       categoryId: z.string(),
       minStock: z.number(),
+      capacity: z.number(),
     });
     const idParsed = validateIdSchema.safeParse(request.params);
     const body = updateProductSchema.safeParse(request.body);
@@ -131,8 +135,24 @@ export const update: RequestHandler = async (request, response) => {
       qtd,
       price,
       categoryId,
-      minStock, 
+      minStock,
     });
+
+    const stockExists = await StockRepository.findByProductId(id);
+    if (stockExists) {
+      await StockRepository.update(stockExists.id, {
+        capacity,
+        qtd,
+        minStock,
+      });
+    } else {
+      await StockRepository.create({
+        productId: product.id,
+        capacity,
+        qtd,
+        minStock,
+      });
+    }
 
     response.json(product);
   } catch (error) {
@@ -144,8 +164,11 @@ export const deleteProduct: RequestHandler = async (request, response) => {
   try {
     const { id } = request.params;
 
-    const deleteProductSchema = z.string();
-    const body = deleteProductSchema.safeParse(request.params);
+    const validateIdSchema = z.object({
+      id: z.string().uuid("ID inválido"),
+    });
+
+    const body = validateIdSchema.safeParse(request.params);
 
     if (!body.success) {
       return response.status(400).json({ error: "ID inválido" });
@@ -155,6 +178,12 @@ export const deleteProduct: RequestHandler = async (request, response) => {
     if (!productExists) {
       return response.status(404).json({ error: "Produto não encontrado" });
     }
+
+    const stockExists = await StockRepository.findByProductId(id);
+    if (stockExists) {
+      await StockRepository.delete(stockExists.id);
+    }
+
     await ProductRepository.delete(id);
     response.sendStatus(204);
   } catch (error) {

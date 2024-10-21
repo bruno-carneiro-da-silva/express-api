@@ -82,11 +82,10 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { productId, capacity, qtd, minStock } = request.body;
+    const { capacity, qtd, minStock } = request.body;
     const { id } = request.params;
     const updateStockIdSchema = z.string();
     const updateStockSchema = z.object({
-      productId: z.string(),
       capacity: z.number(),
       qtd: z.number(),
       minStock: z.number(),
@@ -103,7 +102,7 @@ export const update: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
     }
-    const productIdExists = await ProductRepository.findById(productId);
+    const productIdExists = await ProductRepository.findById(id);
     const stockExists = await StockRepository.findById(id);
 
     if (!productIdExists) {
@@ -117,7 +116,6 @@ export const update: RequestHandler = async (request, response) => {
     }
 
     const stock = await StockRepository.update(id, {
-      productId,
       capacity,
       qtd,
       minStock,

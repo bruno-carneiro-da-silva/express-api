@@ -42,7 +42,12 @@ BEGIN
     END IF;
 END $$;
 
-ALTER TABLE "Sale" ADD COLUMN "companyId" TEXT NOT NULL;
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Sale' AND column_name='companyId') THEN
+        ALTER TABLE "Sale" ADD COLUMN "companyId" TEXT NOT NULL;
+    END IF;
+END $$;
 
 -- AlterTable
 ALTER TABLE "SoldItem" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

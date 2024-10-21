@@ -11,16 +11,25 @@ import loginRoutes from "./routes/site";
 import { requestInterceptor } from "./utils/requestInterceptor";
 
 const app = express();
-app.use(cors());
+
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:3000";
+
+const corsOptions = {
+  origin: allowedOrigin,
+  optionsSuccessStatus: 200,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(helmet());
 
 const limiter = rateLimit({
-  windowMs: 10000, 
+  windowMs: 10000,
   max: 10,
-  message: "Muitas requisições feitas pelo usuário, tente novamente mais tarde.",
+  message:
+    "Muitas requisições feitas pelo usuário, tente novamente mais tarde.",
 });
 
 app.use(limiter);

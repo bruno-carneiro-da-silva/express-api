@@ -34,15 +34,29 @@ ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 ALTER TABLE "Role" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
-ALTER TABLE "Sale" DROP COLUMN "userId",
-ADD COLUMN "companyId" TEXT NOT NULL;
+-- Verifique se a coluna "userId" existe antes de tentar removê-la
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Sale' AND column_name='userId') THEN
+        ALTER TABLE "Sale" DROP COLUMN "userId";
+    END IF;
+END $$;
+
+ALTER TABLE "Sale" ADD COLUMN "companyId" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "SoldItem" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
-ALTER TABLE "Supplier" DROP COLUMN "userId",
-ADD COLUMN "companyId" TEXT NOT NULL;
+-- Verifique se a coluna "userId" existe antes de tentar removê-la
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Supplier' AND column_name='userId') THEN
+        ALTER TABLE "Supplier" DROP COLUMN "userId";
+    END IF;
+END $$;
+
+ALTER TABLE "Supplier" ADD COLUMN "companyId" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "Transaction" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

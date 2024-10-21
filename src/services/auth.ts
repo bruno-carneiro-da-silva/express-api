@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import UsersRepository from "../repositories/UserRepository";
+import CompaniesRepository from "../repositories/CompanyRepository";
 import "dotenv/config";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret";
@@ -11,7 +11,7 @@ export const validadeCredentials = async (
   password: string,
   emailAdmin: string
 ): Promise<boolean> => {
-  const user = await UsersRepository.findByEmail(emailAdmin);
+  const user = await CompaniesRepository.findByEmail(emailAdmin);
   if (!user) {
     return false;
   }

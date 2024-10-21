@@ -7,7 +7,7 @@ import * as product from "../controllers/ProductController";
 import * as transaction from "../controllers/TransactionController";
 import * as employee from "../controllers/EmployeeController";
 import * as sales from "../controllers/SalesController";
-import * as user from "../controllers/UsersController";
+import * as company from "../controllers/CompanyController";
 import * as soldItem from "../controllers/SoldItemController";
 import * as stock from "../controllers/StockController";
 import { sanitizeBody, validateId, validateUser } from "../middlewares";
@@ -49,10 +49,10 @@ router.delete(
   transaction.deleteTransaction
 );
 
-router.get("/users", auth.validate, user.index);
-router.get("/users/:id", validateId, auth.validate, user.show);
+router.get("/companies", auth.validate, company.index);
+router.get("/companies/:id", validateId, auth.validate, company.show);
 router.post(
-  "/users",
+  "/companies",
   sanitizeBody([
     "firstName",
     "lastName",
@@ -66,10 +66,10 @@ router.post(
     "role",
   ]),
   validateUser,
-  user.store
+  company.store
 );
 router.put(
-  "/users/:id",
+  "/companies/:id",
   validateId,
   sanitizeBody([
     "username",
@@ -86,9 +86,9 @@ router.put(
   ]),
   validateUser,
   auth.validate,
-  user.update
+  company.update
 );
-router.delete("/users/:id", validateId, auth.validate, user.deleteUser);
+router.delete("/companies/:id", validateId, auth.validate, company.deleteUser);
 
 router.get("/employees", auth.validate, employee.index);
 router.get("/employees/:id", auth.validate, employee.show);

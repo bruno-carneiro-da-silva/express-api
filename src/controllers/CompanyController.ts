@@ -1,11 +1,11 @@
 import { RequestHandler } from "express";
-import UsersRepository from "../repositories/UserRepository";
+import CompaniesRepository from "../repositories/CompanyRepository";
 import { z } from "zod";
 
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy } = request.query;
-    const users = await UsersRepository.findAll(orderBy as string);
+    const users = await CompaniesRepository.findAll(orderBy as string);
     return response.json(users);
   } catch (error) {
     response.status(500).json({ error: "Erro ao buscar usuários" });
@@ -15,15 +15,16 @@ export const index: RequestHandler = async (request, response) => {
 export const show: RequestHandler = async (request, response) => {
   try {
     const { id } = request.params;
-    const user = await UsersRepository.findById(id);
+    const company = await CompaniesRepository.findById(id);
 
-    if (!user) {
+    if (!company) {
       return response.status(404).json({ error: "Usuário não encontrado" });
     }
-    const { refreshToken, ...userWithoutRefreshToken } = user;
+    const { refreshToken, ...companyWithoutRefreshToken } = company;
 
-    response.json(userWithoutRefreshToken);
+    response.json(companyWithoutRefreshToken);
   } catch (error) {
+    console.log(error);
     response.status(500).json({ error: "Erro ao buscar usuário" });
   }
 };
@@ -42,7 +43,7 @@ export const store: RequestHandler = async (request, response) => {
       password,
       roleId,
     } = request.body;
-    const addUserSchema = z.object({
+    const addCompanySchema = z.object({
       firstName: z.string(),
       lastName: z.string(),
       emailAdmin: z.string().email({ message: "Email inválido" }),
@@ -58,7 +59,7 @@ export const store: RequestHandler = async (request, response) => {
       password: z.string(),
     });
 
-    const body = addUserSchema.safeParse(request.body);
+    const body = addCompanySchema.safeParse(request.body);
 
     if (!body.success) {
       return response
@@ -66,14 +67,22 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const userExists = await UsersRepository.findByEmail(emailAdmin);
-    if (userExists) {
+    const companyExists = await CompaniesRepository.findByEmail(emailAdmin);
+    const companyPhoneExists = await CompaniesRepository.findByPhoneNumber(
+      phoneNumberAdmin
+    );
+    if (companyPhoneExists) {
+      return response
+        .status(400)
+        .json({ error: "Esse número de telefone já está cadastrado" });
+    }
+    if (companyExists) {
       return response
         .status(400)
         .json({ error: "Esse email já está cadastrado" });
     }
     const defaultRoleId = 1;
-    const user = await UsersRepository.create({
+    const company = await CompaniesRepository.create({
       firstName,
       lastName,
       emailAdmin,
@@ -86,9 +95,7 @@ export const store: RequestHandler = async (request, response) => {
       roleId: roleId || defaultRoleId,
     });
 
-    const { password: _, ...userWithoutPassword } = user;
-
-    response.json(userWithoutPassword);
+    response.json(company);
   } catch (error) {
     response.status(500).json({ error: error });
   }
@@ -110,7 +117,7 @@ export const update: RequestHandler = async (request, response) => {
     } = request.body;
     const { id } = request.params;
 
-    const updateUserSchema = z.object({
+    const updateCompanySchema = z.object({
       firstName: z.string(),
       lastName: z.string(),
       emailAdmin: z.string().email({ message: "Email inválido" }),
@@ -126,7 +133,7 @@ export const update: RequestHandler = async (request, response) => {
       password: z.string(),
     });
 
-    const body = updateUserSchema.safeParse(request.body);
+    const body = updateCompanySchema.safeParse(request.body);
 
     if (!body.success) {
       return response
@@ -134,19 +141,19 @@ export const update: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const userExists = await UsersRepository.findById(id);
+    const companyExists = await CompaniesRepository.findById(id);
 
-    if (!userExists) {
+    if (!companyExists) {
       return response.status(404).json({ error: "Usuário inexistente" });
     }
 
-    const emailExists = await UsersRepository.findByEmail(emailAdmin);
+    const emailExists = await CompaniesRepository.findByEmail(emailAdmin);
 
     if (emailExists && emailExists.id !== id) {
       return response.status(400).json({ error: "Esse usuário já existe" });
     }
 
-    const user = await UsersRepository.update(id, {
+    const company = await CompaniesRepository.update(id, {
       firstName,
       lastName,
       emailAdmin,
@@ -159,7 +166,7 @@ export const update: RequestHandler = async (request, response) => {
       roleId,
     });
 
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, ...userWithoutPassword } = company;
     response.json(userWithoutPassword);
   } catch (error) {
     response.status(500).json({ error: "Erro ao atualizar usuário" });
@@ -178,12 +185,12 @@ export const deleteUser: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "ID inválido" });
     }
 
-    const userExists = await UsersRepository.findById(id);
+    const companyExists = await CompaniesRepository.findById(id);
 
-    if (!userExists) {
+    if (!companyExists) {
       return response.status(404).json({ error: "Usuário não encontrado" });
     }
-    await UsersRepository.delete(id);
+    await CompaniesRepository.delete(id);
     response.sendStatus(204);
   } catch (error) {
     response.status(500).json({ error: "Erro ao deletar usuário" });

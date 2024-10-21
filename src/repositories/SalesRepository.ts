@@ -11,7 +11,7 @@ class SalesRepository {
       },
       include: {
         employee: true,
-        user: true,
+        company: true,
         soldItems: true,
       },
     });
@@ -22,13 +22,13 @@ class SalesRepository {
       where: { id },
       include: {
         employee: true,
-        user: true,
+        company: true,
         soldItems: true,
       },
     });
   }
 
-  async create({ employeeId, userId, totalPrice, discount, soldItems }: ISale) {
+  async create({ employeeId, companyId, totalPrice, discount, soldItems }: ISale) {
     // Verificar se a quantidade solicitada está disponível no estoque
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({
@@ -45,7 +45,7 @@ class SalesRepository {
     const sale = await prisma.sale.create({
       data: {
         employeeId,
-        userId,
+        companyId,
         totalPrice,
         discount,
         soldItems: {
@@ -58,7 +58,7 @@ class SalesRepository {
       },
       include: {
         employee: true,
-        user: true,
+        company: true,
         soldItems: true,
       },
     });
@@ -83,7 +83,7 @@ class SalesRepository {
 
   async update(
     id: string,
-    { employeeId, userId, totalPrice, discount, soldItems }: ISale
+    { employeeId, companyId, totalPrice, discount, soldItems }: ISale
   ) {
     // Verificar se a quantidade solicitada está disponível no estoque
     for (const item of soldItems) {
@@ -102,7 +102,7 @@ class SalesRepository {
       where: { id },
       data: {
         employeeId,
-        userId,
+        companyId,
         totalPrice,
         discount,
         soldItems: {
@@ -115,7 +115,7 @@ class SalesRepository {
       },
       include: {
         employee: true,
-        user: true,
+        company: true,
         soldItems: true,
       },
     });

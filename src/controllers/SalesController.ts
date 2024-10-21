@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import SalesRepository from "../repositories/SalesRepository";
 import { z } from "zod";
 import EmployeeRepository from "../repositories/EmployeeRepository";
-import UserRepository from "../repositories/UserRepository";
+import CompaniesRepository from "../repositories/CompanyRepository";
 
 export const index: RequestHandler = async (request, response) => {
   const { orderBy } = request.query;
@@ -34,12 +34,12 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { employeeId, userId, totalPrice, discount, soldItems } =
+    const { employeeId, companyId, totalPrice, discount, soldItems } =
       request.body;
 
     const addSaleSchema = z.object({
       employeeId: z.string(),
-      userId: z.string(),
+      companyId: z.string(),
       totalPrice: z.number(),
       discount: z.number(),
       soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
@@ -54,18 +54,18 @@ export const store: RequestHandler = async (request, response) => {
     }
 
     const employeeExists = await EmployeeRepository.findById(employeeId);
-    const userExists = await UserRepository.findById(userId);
+    const companyExists = await CompaniesRepository.findById(companyId);
     if (!employeeExists) {
       return response.status(404).json({ error: "Funcionário não encontrado" });
     }
 
-    if (!userExists) {
+    if (!companyExists) {
       return response.status(404).json({ error: "Usuário não encontrado" });
     }
 
     const sale = await SalesRepository.create({
       employeeId,
-      userId,
+      companyId,
       totalPrice,
       discount,
       soldItems,
@@ -78,13 +78,13 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { employeeId, userId, totalPrice, discount, soldItems } =
+    const { employeeId, companyId, totalPrice, discount, soldItems } =
       request.body;
     const { id } = request.params;
     const updateIdSchema = z.string();
     const updateSaleSchema = z.object({
       employeeId: z.string(),
-      userId: z.string(),
+      companyId: z.string(),
       totalPrice: z.number(),
       discount: z.number(),
       soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
@@ -107,18 +107,18 @@ export const update: RequestHandler = async (request, response) => {
     }
 
     const employeeExists = await EmployeeRepository.findById(employeeId);
-    const userExists = await UserRepository.findById(userId);
+    const companyExists = await CompaniesRepository.findById(companyId);
     if (!employeeExists) {
       return response.status(404).json({ error: "Funcionário não encontrado" });
     }
 
-    if (!userExists) {
+    if (!companyExists) {
       return response.status(404).json({ error: "Usuário não encontrado" });
     }
 
     const sale = await SalesRepository.update(id, {
       employeeId,
-      userId,
+      companyId,
       totalPrice,
       discount,
       soldItems,

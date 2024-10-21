@@ -5,10 +5,10 @@ import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
-class UsersRepository {
+class CompaniesRepository {
   async findAll(orderBy = "ASC") {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
-    const users = await prisma.user.findMany({
+    const companies = await prisma.company.findMany({
       orderBy: {
         emailAdmin: direction,
       },
@@ -35,60 +35,63 @@ class UsersRepository {
         refreshToken: false,
         verificationCode: false,
         verificationCodeExpiresAt: false,
+        _count: {
+          select: { contacts: true, suppliers: true, sales: true },
+        },
       },
     });
-    return users;
+    return companies;
   }
 
   async findById(id: string) {
-    const user = await prisma.user.findUnique({
+    const company = await prisma.company.findUnique({
       where: { id },
       include: {
         role: true,
       },
     });
-    return user;
+    return company;
   }
 
   async findByEmail(email: string) {
-    const user = await prisma.user.findUnique({
+    const company = await prisma.company.findUnique({
       where: { emailAdmin: email },
       include: {
         role: true,
       },
     });
-    return user;
+    return company;
   }
 
   async findByAccessToken(accessToken: string) {
     const decoded = jwt.decode(accessToken) as { email: string };
-    const user = await prisma.user.findUnique({
+    const company = await prisma.company.findUnique({
       where: { emailAdmin: decoded.email },
       include: {
         role: true,
       },
     });
-    return user;
+    return company;
   }
 
   async findByRefreshToken(refreshToken: string) {
-    const user = await prisma.user.findFirst({
+    const company = await prisma.company.findFirst({
       where: { refreshToken },
       include: {
         role: true,
       },
     });
-    return user;
+    return company;
   }
 
   async findByPhoneNumber(phoneNumberAdmin: string) {
-    const user = await prisma.user.findUnique({
-      where: { phoneNumberAdmin: phoneNumberAdmin },
+    const company = await prisma.company.findUnique({
+      where: { phoneNumberAdmin },
       include: {
         role: true,
       },
     });
-    return user;
+    return company;
   }
 
   async create({
@@ -104,7 +107,7 @@ class UsersRepository {
     roleId,
   }: IUser & { roleId: number }) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.create({
+    const company = await prisma.company.create({
       data: {
         firstName,
         lastName,
@@ -118,7 +121,8 @@ class UsersRepository {
         roleId,
       },
     });
-    return user;
+    const { password: _, ...companyWithoutPassword } = company;
+    return companyWithoutPassword;
   }
 
   async update(
@@ -137,7 +141,7 @@ class UsersRepository {
     }: IUser & { roleId: number }
   ) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await prisma.user.update({
+    const company = await prisma.company.update({
       where: { id },
       data: {
         firstName,
@@ -152,28 +156,28 @@ class UsersRepository {
         roleId,
       },
     });
-    return user;
+    return company;
   }
 
   async updateRefreshToken(id: string, refreshToken: string) {
-    const user = await prisma.user.update({
+    const company = await prisma.company.update({
       where: { id },
       data: {
         refreshToken,
       },
     });
-    return user;
+    return company;
   }
 
   async updateVerificationCode(email: string, code: string, expiresAt: Date) {
-    const user = await prisma.user.update({
+    const company = await prisma.company.update({
       where: { emailAdmin: email },
       data: {
         verificationCode: code,
         verificationCodeExpiresAt: expiresAt,
       },
     });
-    return user;
+    return company;
   }
 
   async updatePasswordByPhoneNumber(
@@ -181,7 +185,7 @@ class UsersRepository {
     newPassword: string
   ) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const user = await prisma.user.update({
+    const company = await prisma.company.update({
       where: { phoneNumberAdmin: phoneNumberAdmin },
       data: {
         password: hashedPassword,
@@ -189,15 +193,15 @@ class UsersRepository {
         verificationCodeExpiresAt: null,
       },
     });
-    return user;
+    return company;
   }
 
   async delete(id: string) {
-    const user = await prisma.user.delete({
+    const company = await prisma.company.delete({
       where: { id },
     });
-    return user;
+    return company;
   }
 }
 
-export default new UsersRepository();
+export default new CompaniesRepository();

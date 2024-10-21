@@ -1,6 +1,6 @@
 export interface ISale {
   employeeId: string;
-  userId: string;
+  companyId: string;
   totalPrice: number;
   discount?: number;
   soldItems: {

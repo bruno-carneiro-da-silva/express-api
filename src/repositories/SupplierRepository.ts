@@ -11,7 +11,7 @@ class SupplierRepository {
       },
       include: {
         transactions: true,
-        user: {
+        company: {
           select: {
             id: true,
             firstName: true,
@@ -30,7 +30,7 @@ class SupplierRepository {
       where: { id },
       include: {
         transactions: true,
-        user: {
+        company: {
           select: {
             id: true,
             firstName: true,
@@ -77,7 +77,7 @@ class SupplierRepository {
         dateOfBirth,
         nationality,
         niche,
-        user: {
+        company: {
           connect: {
             id: userId,
           },
@@ -138,7 +138,7 @@ class SupplierRepository {
         dateOfBirth,
         nationality,
         niche,
-        user: {
+        company: {
           connect: {
             id: userId,
           },

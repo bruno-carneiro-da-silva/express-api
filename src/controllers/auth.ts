@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import * as auth from "../services/auth";
-import UsersRepository from "../repositories/UserRepository";
+import CompaniesRepository from "../repositories/CompanyRepository";
 import bcrypt from "bcrypt";
 import { sendEmail } from "../services/twilio";
 import jwt from "jsonwebtoken";
@@ -16,7 +16,7 @@ export const login: RequestHandler = async (req, res) => {
   const body = loginSchema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByPhoneNumber(
+  const user = await CompaniesRepository.findByPhoneNumber(
     body.data.phoneNumberAdmin
   );
 
@@ -38,7 +38,7 @@ export const login: RequestHandler = async (req, res) => {
     body.data.phoneNumberAdmin
   );
   if (user.id) {
-    await UsersRepository.updateRefreshToken(user.id, refreshToken);
+    await CompaniesRepository.updateRefreshToken(user.id, refreshToken);
   }
 
   const { password, refreshToken: _, ...userWithoutPassword } = user;
@@ -56,7 +56,7 @@ export const sendVerificationCode: RequestHandler = async (req, res) => {
   const body = schema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByEmail(body.data.emailAdmin);
+  const user = await CompaniesRepository.findByEmail(body.data.emailAdmin);
   if (!user) {
     return res.status(404).json({ error: "Usuário não encontrado" });
   }
@@ -66,7 +66,7 @@ export const sendVerificationCode: RequestHandler = async (req, res) => {
   ).toString();
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutos
 
-  await UsersRepository.updateVerificationCode(
+  await CompaniesRepository.updateVerificationCode(
     user.emailAdmin,
     verificationCode,
     expiresAt
@@ -92,7 +92,7 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
   const body = schema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByPhoneNumber(
+  const user = await CompaniesRepository.findByPhoneNumber(
     body.data.phoneNumberAdmin
   );
   if (
@@ -107,7 +107,7 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
   }
 
   const hashedPassword = await bcrypt.hash(body.data.newPassword, 10);
-  await UsersRepository.updatePasswordByPhoneNumber(
+  await CompaniesRepository.updatePasswordByPhoneNumber(
     body.data.phoneNumberAdmin,
     hashedPassword
   );
@@ -138,7 +138,7 @@ export const validate: RequestHandler = async (req, res, next) => {
 
   const isValidToken = auth.validateToken(token);
   if (!isValidToken) {
-    const user = await UsersRepository.findByAccessToken(token);
+    const user = await CompaniesRepository.findByAccessToken(token);
     if (!user || !auth.validateRefreshToken(user?.refreshToken ?? "")) {
       return res.status(403).json({ error: "Refresh token inválido" });
     }
@@ -161,7 +161,7 @@ export const refreshToken: RequestHandler = async (req, res) => {
   const body = refreshTokenSchema.safeParse(req.body);
   if (!body.success) return res.status(400).json({ error: "Dados inválidos" });
 
-  const user = await UsersRepository.findByRefreshToken(body.data.token);
+  const user = await CompaniesRepository.findByRefreshToken(body.data.token);
   if (!user || !auth.validateRefreshToken(body.data.token)) {
     return res.status(403).json({ error: "Acesso negado" });
   }

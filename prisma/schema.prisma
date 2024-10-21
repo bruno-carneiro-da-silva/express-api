@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Company {
   id                 String   @id @default(uuid())
   firstName          String   @default("")
   lastName           String   @default("")
@@ -30,6 +30,7 @@ model User {
   roleId             Int?
   role               Role?    @relation(fields: [roleId], references: [id])
   suppliers          Supplier[]
+  contacts           Contact[]
 }
 
 model Role {
@@ -38,8 +39,8 @@ model Role {
   name        String   @unique
   permissions String[] @default(["*"])
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  users       User[]
+  updatedAt   DateTime @default(now())
+  companies   Company[]
 }
 
 model Plan {
@@ -48,8 +49,8 @@ model Plan {
   description String?
   price       Float
   createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  users       User[]
+  updatedAt   DateTime     @default(now())
+  companies   Company[]
   features    Feature[]
   prices      Price[]
 }
@@ -60,7 +61,7 @@ model Feature {
   description String?
   planId      String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
   plan        Plan     @relation(fields: [planId], references: [id])
 }
 
@@ -71,7 +72,7 @@ model Price {
   benefits    String?
   planId      String
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
   plan        Plan     @relation(fields: [planId], references: [id])
 }
 
@@ -79,7 +80,7 @@ model Category {
   id        String   @id @default(uuid())
   name      String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
   products  Product[]
   contacts  Contact[]
 }
@@ -90,9 +91,11 @@ model Contact {
   email      String?  @unique
   phone      String
   categoryId String?
+  companyId  String?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now())
   category   Category? @relation(fields: [categoryId], references: [id])
+  company    Company?  @relation(fields: [companyId], references: [id])
 }
 
 model Employee {
@@ -119,18 +122,18 @@ model Supplier {
   dateOfBirth     DateTime
   nationality     String
   niche           String
-	photo           String
-	city            String
-	startContractDate DateTime
-	endContractDate DateTime
+  photo           String
+  city            String
+  startContractDate DateTime
+  endContractDate DateTime
   corporateReason String
   email           String?  @unique
   phone           String
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   transactions    Transaction[]
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
 }
 
 model Product {
@@ -140,7 +143,7 @@ model Product {
   price      Float
   categoryId String
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now())
   category   Category @relation(fields: [categoryId], references: [id])
   stock      Stock?
   soldItems  SoldItem[]
@@ -161,13 +164,13 @@ model Stock {
 model Sale {
   id         String   @id @default(uuid())
   employeeId String
-  userId     String
+  companyId  String
   totalPrice Float
   discount   Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   employee   Employee @relation(fields: [employeeId], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  company    Company  @relation(fields: [companyId], references: [id])
   soldItems  SoldItem[]
 }
 

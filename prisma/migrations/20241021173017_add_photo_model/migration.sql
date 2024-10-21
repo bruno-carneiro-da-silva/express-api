@@ -45,7 +45,7 @@ END $$;
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Sale' AND column_name='companyId') THEN
-        ALTER TABLE "Sale" ADD COLUMN "companyId" TEXT NOT NULL;
+        ALTER TABLE "Sale" ADD COLUMN "companyId" TEXT;
     END IF;
 END $$;
 
@@ -65,7 +65,7 @@ END $$;
 DO $$
 BEGIN
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Supplier' AND column_name='userId') THEN
-        ALTER TABLE "Supplier" ADD COLUMN "companyId" NOT NULL;
+        ALTER TABLE "Supplier" ADD COLUMN "companyId" TEXT;
     END IF;
 END $$;
 

@@ -82,76 +82,101 @@ END $$;
 
 
 -- CreateTable
-CREATE TABLE "Company" (
-    "id" TEXT NOT NULL,
-    "firstName" TEXT NOT NULL DEFAULT '',
-    "lastName" TEXT NOT NULL DEFAULT '',
-    "emailAdmin" TEXT NOT NULL DEFAULT '',
-    "phoneNumberAdmin" TEXT NOT NULL DEFAULT '',
-    "password" TEXT NOT NULL,
-    "nameCompany" TEXT NOT NULL DEFAULT '',
-    "emailCompany" TEXT NOT NULL DEFAULT '',
-    "phoneNumberCompany" TEXT NOT NULL DEFAULT '',
-    "addressCompany" TEXT NOT NULL DEFAULT '',
-    "terms" BOOLEAN DEFAULT false,
-    "refreshToken" TEXT,
-    "verificationCode" TEXT,
-    "verificationCodeExpiresAt" TIMESTAMP(3),
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "planId" TEXT,
-    "roleId" INTEGER,
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Company') THEN
+        CREATE TABLE "Company" (
+            "id" TEXT NOT NULL,
+            "firstName" TEXT NOT NULL DEFAULT '',
+            "lastName" TEXT NOT NULL DEFAULT '',
+            "emailAdmin" TEXT NOT NULL DEFAULT '',
+            "phoneNumberAdmin" TEXT NOT NULL DEFAULT '',
+            "password" TEXT NOT NULL,
+            "nameCompany" TEXT NOT NULL DEFAULT '',
+            "emailCompany" TEXT NOT NULL DEFAULT '',
+            "phoneNumberCompany" TEXT NOT NULL DEFAULT '',
+            "addressCompany" TEXT NOT NULL DEFAULT '',
+            "terms" BOOLEAN DEFAULT false,
+            "refreshToken" TEXT,
+            "verificationCode" TEXT,
+            "verificationCodeExpiresAt" TIMESTAMP(3),
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL,
+            "planId" TEXT,
+            "roleId" INTEGER,
+            CONSTRAINT "Company_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
-    CONSTRAINT "Company_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Plan" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "price" DOUBLE PRECISION NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
-);
 
 -- CreateTable
-CREATE TABLE "Feature" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "description" TEXT,
-    "planId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Plan') THEN
+      CREATE TABLE "Plan" (
+          "id" TEXT NOT NULL,
+          "name" TEXT NOT NULL,
+          "description" TEXT,
+          "price" DOUBLE PRECISION NOT NULL,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Feature_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "Price" (
-    "id" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
-    "price" DOUBLE PRECISION NOT NULL,
-    "benefits" TEXT,
-    "planId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "Price_pkey" PRIMARY KEY ("id")
-);
+          CONSTRAINT "Plan_pkey" PRIMARY KEY ("id")
+      );
+    END IF;
+END $$;
 
 -- CreateTable
-CREATE TABLE "Photo" (
-    "id" TEXT NOT NULL,
-    "url" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Feature') THEN
+      CREATE TABLE "Feature" (
+          "id" TEXT NOT NULL,
+          "name" TEXT NOT NULL,
+          "description" TEXT,
+          "planId" TEXT NOT NULL,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "Photo_pkey" PRIMARY KEY ("id")
-);
+          CONSTRAINT "Feature_pkey" PRIMARY KEY ("id")
+      );
+    END IF;
+END $$;
+
+-- CreateTable
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Price') THEN
+      CREATE TABLE "Price" (
+          "id" TEXT NOT NULL,
+          "name" TEXT NOT NULL,
+          "price" DOUBLE PRECISION NOT NULL,
+          "benefits" TEXT,
+          "planId" TEXT NOT NULL,
+          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+          CONSTRAINT "Price_pkey" PRIMARY KEY ("id")
+      );
+    END IF;
+END $$;
+
+-- CreateTable
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Photo') THEN
+        CREATE TABLE "Photo" (
+            "id" TEXT NOT NULL,
+            "url" TEXT NOT NULL,
+            "productId" TEXT NOT NULL,
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+            CONSTRAINT "Photo_pkey" PRIMARY KEY ("id")
+        );
+    END IF;
+END $$;
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Company_emailAdmin_key" ON "Company"("emailAdmin");

@@ -34,12 +34,10 @@ export const generateRefreshToken = (
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, options);
 };
 
-export const validateToken = (
-  token: string
-): { valid: boolean; reason?: string } => {
+export const validateToken = (token: string) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return { valid: true };
+    return !!decoded;
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
       return { valid: false, reason: "expired" };

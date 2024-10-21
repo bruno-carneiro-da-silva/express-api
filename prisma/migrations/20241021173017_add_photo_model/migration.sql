@@ -15,12 +15,19 @@
 ALTER TABLE "Category" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
-ALTER TABLE "Contact" ADD COLUMN     "companyId" TEXT,
-ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
+-- Verifique se a coluna "companyId" já existe antes de tentar adicioná-la
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Contact' AND column_name='companyId') THEN
+        ALTER TABLE "Contact" ADD COLUMN "companyId" TEXT;
+    END IF;
+END $$;
+
+ALTER TABLE "Contact" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
-ALTER TABLE "Product" ADD COLUMN     "description" TEXT NOT NULL,
-ADD COLUMN     "size" TEXT NOT NULL,
+ALTER TABLE "Product" ADD COLUMN "description" TEXT NOT NULL,
+ADD COLUMN "size" TEXT NOT NULL,
 ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
@@ -28,14 +35,14 @@ ALTER TABLE "Role" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
 ALTER TABLE "Sale" DROP COLUMN "userId",
-ADD COLUMN     "companyId" TEXT NOT NULL;
+ADD COLUMN "companyId" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "SoldItem" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;
 
 -- AlterTable
 ALTER TABLE "Supplier" DROP COLUMN "userId",
-ADD COLUMN     "companyId" TEXT NOT NULL;
+ADD COLUMN "companyId" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "Transaction" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

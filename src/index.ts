@@ -14,7 +14,10 @@ const app = express();
 
 app.set("trust proxy", 1);
 
-const allowedOrigin = [process.env.ALLOWED_ORIGIN, process.env.LOCAHOST];
+const allowedOrigin = [
+  "https://inventorygenius.vercel.app",
+  "http://localhost:3000",
+];
 
 const corsOptions = {
   origin: function (

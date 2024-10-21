@@ -61,7 +61,13 @@ BEGIN
     END IF;
 END $$;
 
-ALTER TABLE "Supplier" ADD COLUMN "companyId" TEXT NOT NULL;
+
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Supplier' AND column_name='userId') THEN
+        ALTER TABLE "Supplier" ADD COLUMN "companyId" NOT NULL;
+    END IF;
+END $$;
 
 -- AlterTable
 ALTER TABLE "Transaction" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

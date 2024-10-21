@@ -12,20 +12,30 @@ import { requestInterceptor } from "./utils/requestInterceptor";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 const allowedOrigin = [
-  "https://inventorygenius.vercel.app/",
+  "https://inventorygenius.vercel.app",
   "http://localhost:3000",
 ];
 
 const corsOptions = {
-  origin: allowedOrigin,
+  origin: function (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) {
+    if (!origin || allowedOrigin.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
 app.use(helmet());
 
 const limiter = rateLimit({

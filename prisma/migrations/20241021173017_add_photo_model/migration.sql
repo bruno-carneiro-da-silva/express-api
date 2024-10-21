@@ -10,14 +10,6 @@
   - Added the required column `companyId` to the `Supplier` table without a default value. This is not possible if the table is not empty.
 
 */
--- DropForeignKey
-ALTER TABLE "Sale" DROP CONSTRAINT "Sale_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "Supplier" DROP CONSTRAINT "Supplier_userId_fkey";
-
--- DropForeignKey
-ALTER TABLE "User" DROP CONSTRAINT "User_roleId_fkey";
 
 -- AlterTable
 ALTER TABLE "Category" ALTER COLUMN "updatedAt" SET DEFAULT CURRENT_TIMESTAMP;

@@ -35,12 +35,13 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, categoryId } = request.body;
+    const { name, email, phone, companyId, categoryId } = request.body;
 
     const addContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
+      companyId: z.string(),
       categoryId: z.string(),
     });
     const categoryExists = await CategoriesRepository.listOne(categoryId);
@@ -65,6 +66,7 @@ export const store: RequestHandler = async (request, response) => {
       name,
       email,
       phone,
+      companyId,
       categoryId,
     });
     response.status(201).json(contact);
@@ -75,13 +77,14 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, categoryId } = request.body;
+    const { name, email, phone, companyId, categoryId } = request.body;
     const { id } = request.params;
     const idSchema = z.string();
     const updateContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
+      companyId: z.string(),
       categoryId: z.string(),
     });
     const idBody = idSchema.safeParse(id);
@@ -97,6 +100,7 @@ export const update: RequestHandler = async (request, response) => {
     }
     const categoryExists = await CategoriesRepository.listOne(categoryId);
     const contactExists = await ContactsRepository.findById(id);
+    const companyExists = await ContactsRepository.findById(companyId);
 
     if (!categoryExists) {
       return response.status(404).json({ error: "Categoria não encontrada" });
@@ -106,10 +110,15 @@ export const update: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Contato não encontrado" });
     }
 
+    if (!companyExists) {
+      return response.status(404).json({ error: "Empresa não encontrada" });
+    }
+
     const contact = await ContactsRepository.update(id, {
       name,
       email,
       phone,
+      companyId,
       categoryId,
     });
     response.json(contact);

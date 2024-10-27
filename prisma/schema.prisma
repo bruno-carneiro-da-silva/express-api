@@ -91,6 +91,8 @@ model Contact {
   email      String?  @unique
   phone      String
   address    String?
+  zip        String?
+  birthday   String?
   categoryId String?
   companyId  String?
   createdAt  DateTime @default(now())

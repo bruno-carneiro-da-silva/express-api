@@ -9,9 +9,6 @@ class ContactsRepository {
       orderBy: {
         name: direction,
       },
-      include: {
-        category: true,
-      },
     });
     return contacts;
   }
@@ -33,14 +30,13 @@ class ContactsRepository {
     return contact;
   }
 
-  async create({ name, email, phone, companyId, categoryId }: IContact) {
+  async create({ name, email, phone, companyId }: IContact) {
     const contact = await prisma.contact.create({
       data: {
         name,
         email,
         phone,
         companyId,
-        categoryId,
       },
     });
     return contact;
@@ -48,18 +44,8 @@ class ContactsRepository {
 
   async update(
     id: string,
-    { name, email, phone, companyId, categoryId }: IContact
+    { name, email, phone, companyId }: IContact
   ) {
-    if (categoryId) {
-      const categoryExists = await prisma.category.findUnique({
-        where: { id: categoryId },
-      });
-
-      if (!categoryExists) {
-        throw new Error("Categoria não encontrada");
-      }
-    }
-
     if (companyId) {
       const companyExists = await prisma.company.findUnique({
         where: { id: companyId },
@@ -77,7 +63,6 @@ class ContactsRepository {
         email,
         phone,
         companyId,
-        categoryId,
       },
     });
     return contact;

@@ -1,7 +1,6 @@
 import { RequestHandler } from "express";
 import ContactsRepository from "../repositories/ContactsRepository";
 import { z } from "zod";
-import CategoriesRepository from "../repositories/CategoriesRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
@@ -35,21 +34,15 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, companyId, categoryId } = request.body;
+    const { name, email, phone, companyId } = request.body;
 
     const addContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
       companyId: z.string(),
-      categoryId: z.string(),
     });
-    const categoryExists = await CategoriesRepository.listOne(categoryId);
     const body = addContactSchema.safeParse(request.body);
-
-    if (!categoryExists) {
-      return response.status(404).json({ error: "Categoria não encontrada" });
-    }
 
     if (!body.success) {
       return response
@@ -67,7 +60,6 @@ export const store: RequestHandler = async (request, response) => {
       email,
       phone,
       companyId,
-      categoryId,
     });
     response.status(201).json(contact);
   } catch (error) {
@@ -77,7 +69,7 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, companyId, categoryId } = request.body;
+    const { name, email, phone, companyId } = request.body;
     const { id } = request.params;
     const idSchema = z.string();
     const updateContactSchema = z.object({
@@ -85,7 +77,6 @@ export const update: RequestHandler = async (request, response) => {
       email: z.string().email(),
       phone: z.string(),
       companyId: z.string(),
-      categoryId: z.string(),
     });
     const idBody = idSchema.safeParse(id);
     const body = updateContactSchema.safeParse(request.body);
@@ -98,13 +89,8 @@ export const update: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
     }
-    const categoryExists = await CategoriesRepository.listOne(categoryId);
     const contactExists = await ContactsRepository.findById(id);
     const companyExists = await ContactsRepository.findById(companyId);
-
-    if (!categoryExists) {
-      return response.status(404).json({ error: "Categoria não encontrada" });
-    }
 
     if (!contactExists) {
       return response.status(404).json({ error: "Contato não encontrado" });
@@ -119,7 +105,6 @@ export const update: RequestHandler = async (request, response) => {
       email,
       phone,
       companyId,
-      categoryId,
     });
     response.json(contact);
   } catch (error) {

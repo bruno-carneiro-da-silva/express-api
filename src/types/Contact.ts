@@ -4,7 +4,6 @@ export interface IContact {
   email: string;
   phone: string;
   companyId: string;
-  categoryId: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

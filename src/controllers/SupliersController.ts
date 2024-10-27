@@ -59,7 +59,6 @@ export const showByCnpj: RequestHandler = async (request, response) => {
     }
     response.json(supplier);
   } catch (error) {
-    console.log('error', error)
     response
       .status(500)
       .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
@@ -76,13 +75,10 @@ export const store: RequestHandler = async (request, response) => {
       email,
       phone,
       lastName,
-      dateOfBirth,
       nationality,
       niche,
       city,
       photo,
-      startContractDate,
-      endContractDate,
     } = request.body;
 
     const supplierSchema = z.object({
@@ -114,7 +110,6 @@ export const store: RequestHandler = async (request, response) => {
     const body = supplierSchema.safeParse(request.body);
 
     if (!body.success) {
-      console.log(body.error.message, body.error.errors)
       return response
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
@@ -161,7 +156,6 @@ export const store: RequestHandler = async (request, response) => {
 
     return response.status(201).json(supplier);
   } catch (error) {
-    console.error(error);
     response
       .status(500)
       .json({ error: "Erro ao criar o fornecedor, tente mais tarde" });

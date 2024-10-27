@@ -6,6 +6,8 @@ export interface IContact {
   address: string;
   zip: string;
   birthday: string;
+  latitude: string
+  longitude: string
   companyId: string;
   createdAt?: Date;
   updatedAt?: Date;

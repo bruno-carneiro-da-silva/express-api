@@ -1,8 +1,8 @@
-import { RequestHandler } from "express";
-import SupplierRepository from "../repositories/SupplierRepository";
-import { z } from "zod";
-import jwt from "jsonwebtoken";
 import "dotenv/config";
+import { RequestHandler } from "express";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
+import SupplierRepository from "../repositories/SupplierRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {

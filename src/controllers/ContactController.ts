@@ -37,7 +37,7 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, address, zip, birthday, companyId } = request.body;
+    const { name, email, phone, address, zip, birthday, latitude, longitude, companyId } = request.body;
 
     const addContactSchema = z.object({
       name: z.string(),
@@ -46,6 +46,8 @@ export const store: RequestHandler = async (request, response) => {
       address: z.string(),
       zip: z.string(),
       birthday: z.string(),
+      latitude: z.string(),
+      longitude: z.string(),
       companyId: z.string(),
     });
     const body = addContactSchema.safeParse(request.body);
@@ -68,6 +70,8 @@ export const store: RequestHandler = async (request, response) => {
       address,
       zip,
       birthday,
+      latitude,
+      longitude,
       companyId,
     });
     response.status(201).json(contact);
@@ -78,7 +82,7 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, address, zip, birthday, companyId } = request.body;
+    const { name, email, phone, address, zip, birthday, latitude, longitude, companyId } = request.body;
     const idSchema = z.object({ id: z.string() });
     const updateContactSchema = z.object({
       name: z.string(),
@@ -87,6 +91,8 @@ export const update: RequestHandler = async (request, response) => {
       address: z.string(),
       zip: z.string(),
       birthday: z.string(),
+      latitude: z.string(),
+      longitude: z.string(),
       companyId: z.string(),
     });
     const idBody = idSchema.safeParse(request.params);
@@ -115,6 +121,8 @@ export const update: RequestHandler = async (request, response) => {
       address,
       zip,
       birthday,
+      latitude,
+      longitude,
       companyId,
     });
     response.json(contact);

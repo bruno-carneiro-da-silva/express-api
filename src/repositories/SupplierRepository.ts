@@ -168,10 +168,10 @@ class SupplierRepository {
   }
 
   async delete(id: string) {
-    const category = await prisma.category.delete({
+    const supplier = await prisma.supplier.delete({
       where: { id },
     });
-    return category;
+    return supplier;
   }
 }
 

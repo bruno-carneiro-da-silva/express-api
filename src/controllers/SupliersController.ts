@@ -256,14 +256,15 @@ export const update: RequestHandler = async (request, response) => {
 
 export const deleteSupplier: RequestHandler = async (request, response) => {
   try {
-    const { id } = request.params;
-    const idSchema = z.string();
+    const idSchema = z.object({ id: z.string() });
 
     const body = idSchema.safeParse(request.params);
 
     if (!body.success) {
       return response.status(400).json({ error: "ID inválido" });
     }
+
+    const id = body.data.id;
     const supplierExists = await SupplierRepository.listOne(id);
 
     if (!supplierExists) {

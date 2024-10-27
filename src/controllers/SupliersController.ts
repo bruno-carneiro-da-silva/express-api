@@ -6,9 +6,12 @@ import "dotenv/config";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy } = request.query;
-    const suppliers = await SupplierRepository.findAll(orderBy as string);
-    return response.json(suppliers);
+    const { orderBy, page = "1", filter = '' } = request.query;
+    const per_page = 4
+
+    const { suppliers, total } = await SupplierRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+
+    return response.json({ suppliers, total, per_page });
   } catch (error) {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
@@ -56,6 +59,7 @@ export const showByCnpj: RequestHandler = async (request, response) => {
     }
     response.json(supplier);
   } catch (error) {
+    console.log('error', error)
     response
       .status(500)
       .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
@@ -110,6 +114,7 @@ export const store: RequestHandler = async (request, response) => {
     const body = supplierSchema.safeParse(request.body);
 
     if (!body.success) {
+      console.log(body.error.message, body.error.errors)
       return response
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
@@ -144,13 +149,13 @@ export const store: RequestHandler = async (request, response) => {
       email,
       phone,
       lastName,
-      dateOfBirth,
+      dateOfBirth: body.data.dateOfBirth,
       nationality,
       niche,
       city,
       photo,
-      startContractDate,
-      endContractDate,
+      startContractDate: body.data.startContractDate,
+      endContractDate: body.data.endContractDate,
       userId: decoded.userId,
     });
 

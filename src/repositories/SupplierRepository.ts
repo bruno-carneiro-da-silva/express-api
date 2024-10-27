@@ -1,14 +1,30 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { ISupplier } from "../types/Supplier";
 const prisma = new PrismaClient();
 
 class SupplierRepository {
-  async findAll(orderBy = "ASC") {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SupplierWhereInput | undefined = filter
+      ? {
+        OR: [
+          { name: { contains: filter, mode: 'insensitive' } },
+          { email: { contains: filter, mode: 'insensitive' } },
+          { phone: { contains: filter, mode: 'insensitive' } },
+          { address: { contains: filter, mode: 'insensitive' } },
+        ],
+      } as const
+      : undefined
+
     const suppliers = await prisma.supplier.findMany({
+      where,
       orderBy: {
         name: direction,
       },
+      skip,
+      take: limit,
       include: {
         transactions: true,
         company: {
@@ -22,7 +38,10 @@ class SupplierRepository {
         },
       },
     });
-    return suppliers;
+
+    const total = await prisma.supplier.count({ where })
+
+    return { suppliers, total };
   }
 
   async listOne(id: string) {

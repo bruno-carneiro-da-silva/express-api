@@ -66,7 +66,6 @@ export const store: RequestHandler = async (request, response) => {
     });
     response.status(201).json(contact);
   } catch (error) {
-    console.log('error', error)
     response.status(500).json({ error: "Erro ao criar contato" });
   }
 };
@@ -74,8 +73,7 @@ export const store: RequestHandler = async (request, response) => {
 export const update: RequestHandler = async (request, response) => {
   try {
     const { name, email, phone, address, companyId } = request.body;
-    const { id } = request.params;
-    const idSchema = z.string();
+    const idSchema = z.object({ id: z.string() });
     const updateContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
@@ -83,7 +81,7 @@ export const update: RequestHandler = async (request, response) => {
       address: z.string(),
       companyId: z.string(),
     });
-    const idBody = idSchema.safeParse(id);
+    const idBody = idSchema.safeParse(request.params);
     const body = updateContactSchema.safeParse(request.body);
 
     if (!idBody.success) {
@@ -94,15 +92,12 @@ export const update: RequestHandler = async (request, response) => {
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
     }
+
+    const id = idBody.data.id
     const contactExists = await ContactsRepository.findById(id);
-    const companyExists = await ContactsRepository.findById(companyId);
 
     if (!contactExists) {
-      return response.status(404).json({ error: "Contato não encontrado" });
-    }
-
-    if (!companyExists) {
-      return response.status(404).json({ error: "Empresa não encontrada" });
+      return response.status(400).json({ error: "Contato não encontrado" });
     }
 
     const contact = await ContactsRepository.update(id, {

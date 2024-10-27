@@ -42,6 +42,7 @@ export const store: RequestHandler = async (request, response) => {
       addressCompany,
       password,
       roleId,
+      photo,
     } = request.body;
     const addCompanySchema = z.object({
       firstName: z.string(),
@@ -93,6 +94,7 @@ export const store: RequestHandler = async (request, response) => {
       addressCompany,
       password,
       roleId: roleId || defaultRoleId,
+      photo,
     });
 
     response.json(company);
@@ -104,38 +106,28 @@ export const store: RequestHandler = async (request, response) => {
 export const update: RequestHandler = async (request, response) => {
   try {
     const {
-      firstName,
-      lastName,
-      emailAdmin,
-      phoneNumberAdmin,
-      nameCompany,
-      emailCompany,
-      phoneNumberCompany,
-      addressCompany,
-      password,
-      roleId,
+      address,
+      email,
+      name,
+      phoneNumber,
+      photo,
     } = request.body;
     const { id } = request.params;
 
     const updateCompanySchema = z.object({
-      firstName: z.string(),
-      lastName: z.string(),
-      emailAdmin: z.string().email({ message: "Email inválido" }),
-      phoneNumberAdmin: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+      name: z.string(),
+      email: z.string(),
+      phoneNumber: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
         message: "Número de telefone inválido",
       }),
-      nameCompany: z.string(),
-      emailCompany: z.string().email({ message: "Email inválido" }),
-      phoneNumberCompany: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
-        message: "Número de telefone inválido",
-      }),
-      addressCompany: z.string(),
-      password: z.string(),
+      address: z.string(),
+      photo: z.string().optional(),
     });
 
     const body = updateCompanySchema.safeParse(request.body);
 
     if (!body.success) {
+      console.log(body.error)
       return response
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
@@ -147,23 +139,18 @@ export const update: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Usuário inexistente" });
     }
 
-    const emailExists = await CompaniesRepository.findByEmail(emailAdmin);
+    const emailExists = await CompaniesRepository.findByEmail(email);
 
     if (emailExists && emailExists.id !== id) {
       return response.status(400).json({ error: "Esse usuário já existe" });
     }
 
     const company = await CompaniesRepository.update(id, {
-      firstName,
-      lastName,
-      emailAdmin,
-      phoneNumberAdmin,
-      nameCompany,
-      emailCompany,
-      phoneNumberCompany,
-      addressCompany,
-      password,
-      roleId,
+      nameCompany: name,
+      emailAdmin: email,
+      phoneNumberAdmin: phoneNumber,
+      addressCompany: address,
+      photo,
     });
 
     const { password: _, ...userWithoutPassword } = company;

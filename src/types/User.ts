@@ -13,6 +13,7 @@ export interface IUser {
   password: string;
   role?: string[];
   planId?: string;
+  photo?: string
   createdAt?: Date;
   updatedAt?: Date;
 }

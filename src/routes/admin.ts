@@ -71,20 +71,6 @@ router.post(
 router.put(
   "/companies/:id",
   validateId,
-  sanitizeBody([
-    "username",
-    "firstName",
-    "lastName",
-    "emailAdmin",
-    "phoneNumberAdmin",
-    "password",
-    "nameCompany",
-    "emailCompany",
-    "phoneNumberCompany",
-    "addressCompany",
-    "role",
-  ]),
-  validateUser,
   auth.validate,
   company.update
 );

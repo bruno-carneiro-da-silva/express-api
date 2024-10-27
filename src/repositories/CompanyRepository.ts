@@ -105,6 +105,7 @@ class CompaniesRepository {
     addressCompany,
     password,
     roleId,
+    photo,
   }: IUser & { roleId: number }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const company = await prisma.company.create({
@@ -119,6 +120,7 @@ class CompaniesRepository {
         addressCompany,
         password: hashedPassword,
         roleId,
+        photo_base64: photo,
       },
     });
     const { password: _, ...companyWithoutPassword } = company;
@@ -128,32 +130,34 @@ class CompaniesRepository {
   async update(
     id: string,
     {
-      firstName,
-      lastName,
-      emailAdmin,
-      phoneNumberAdmin,
+      // firstName,
+      // lastName,
+      // emailAdmin,
+      // phoneNumberAdmin,
+      // password,
+      // roleId,
       nameCompany,
       emailCompany,
       phoneNumberCompany,
       addressCompany,
-      password,
-      roleId,
-    }: IUser & { roleId: number }
+      photo,
+    }: Partial<IUser & { roleId: number }>
   ) {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
     const company = await prisma.company.update({
       where: { id },
       data: {
-        firstName,
-        lastName,
-        emailAdmin,
-        phoneNumberAdmin,
+        // firstName,
+        // lastName,
+        // phoneNumberAdmin,
+        // emailAdmin,
+        // password: hashedPassword,
+        // roleId,
         nameCompany,
         emailCompany,
         phoneNumberCompany,
         addressCompany,
-        password: hashedPassword,
-        roleId,
+        photo_base64: photo,
       },
     });
     return company;

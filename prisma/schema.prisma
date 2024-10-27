@@ -18,6 +18,7 @@ model Company {
   emailCompany       String   @default("")
   phoneNumberCompany String   @default("")
   addressCompany     String   @default("")
+  photo_base64       String?  @db.Text
   terms              Boolean? @default(false)
   refreshToken       String?
   verificationCode   String?

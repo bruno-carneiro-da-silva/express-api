@@ -3,6 +3,7 @@ export interface IContact {
   name: string;
   email: string;
   phone: string;
+  address: string;
   companyId: string;
   createdAt?: Date;
   updatedAt?: Date;

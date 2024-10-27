@@ -27,12 +27,13 @@ class ContactsRepository {
     return contact;
   }
 
-  async create({ name, email, phone, companyId }: IContact) {
+  async create({ name, email, phone, address, companyId }: IContact) {
     const contact = await prisma.contact.create({
       data: {
         name,
         email,
         phone,
+        address,
         companyId,
       },
     });
@@ -41,7 +42,7 @@ class ContactsRepository {
 
   async update(
     id: string,
-    { name, email, phone, companyId }: IContact
+    { name, email, phone, address, companyId }: IContact
   ) {
     if (companyId) {
       const companyExists = await prisma.company.findUnique({
@@ -59,6 +60,7 @@ class ContactsRepository {
         name,
         email,
         phone,
+        address,
         companyId,
       },
     });

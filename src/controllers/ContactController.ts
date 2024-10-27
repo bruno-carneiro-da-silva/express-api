@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import ContactsRepository from "../repositories/ContactsRepository";
 import { z } from "zod";
+import errorMap from "zod/lib/locales/en";
 
 export const index: RequestHandler = async (request, response) => {
   try {
@@ -34,12 +35,13 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, companyId } = request.body;
+    const { name, email, phone, address, companyId } = request.body;
 
     const addContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
+      address: z.string(),
       companyId: z.string(),
     });
     const body = addContactSchema.safeParse(request.body);
@@ -59,23 +61,26 @@ export const store: RequestHandler = async (request, response) => {
       name,
       email,
       phone,
+      address,
       companyId,
     });
     response.status(201).json(contact);
   } catch (error) {
+    console.log('error', error)
     response.status(500).json({ error: "Erro ao criar contato" });
   }
 };
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, companyId } = request.body;
+    const { name, email, phone, address, companyId } = request.body;
     const { id } = request.params;
     const idSchema = z.string();
     const updateContactSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
+      address: z.string(),
       companyId: z.string(),
     });
     const idBody = idSchema.safeParse(id);
@@ -104,6 +109,7 @@ export const update: RequestHandler = async (request, response) => {
       name,
       email,
       phone,
+      address,
       companyId,
     });
     response.json(contact);

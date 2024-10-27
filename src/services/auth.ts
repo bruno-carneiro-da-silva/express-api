@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { JsonWebTokenError } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import CompaniesRepository from "../repositories/CompanyRepository";
 import "dotenv/config";
@@ -30,19 +30,21 @@ export const generateRefreshToken = (
   phoneNumberAdmin: string
 ) => {
   const payload = { userId, phoneNumberAdmin };
-  const options = { expiresIn: "7d" }; // Refresh token expires in 7 days
+  const options = { expiresIn: "7d" }; 
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, options);
 };
 
 export const validateToken = (token: string) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    return !!decoded;
-  } catch (err: any) {
-    if (err.name === "TokenExpiredError") {
+    return { valid: true, decoded };
+  } catch (err: unknown) {
+    if (err instanceof JsonWebTokenError && err.name === "TokenExpiredError") {
       return { valid: false, reason: "expired" };
+    } else if (err instanceof JsonWebTokenError && err.name === "SyntaxError") {
+      return { valid: false, reason: "invalid" };
     }
-    return { valid: false, reason: "invalid" };
+    return { valid: false, reason: "unknown" };
   }
 };
 

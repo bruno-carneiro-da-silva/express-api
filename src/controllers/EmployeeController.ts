@@ -1,6 +1,8 @@
 import { RequestHandler } from "express";
 import EmployeeRepository from "../repositories/EmployeeRepository";
 import { z } from "zod";
+import RoleRepository from "../repositories/RoleRepository";
+
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy } = request.query;
@@ -26,16 +28,19 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, address, role, login, senha } = request.body;
+    const { name, email, phone, address, roleId, userName, password } =
+      request.body;
 
     const addEmployeeSchema = z.object({
       name: z.string(),
-      email: z.string().email(),
-      phone: z.string(),
+      email: z.string().email({ message: "Email inválido" }),
+      phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
+        message: "Número de telefone inválido",
+      }),
       address: z.string(),
-      role: z.string(),
-      login: z.string(),
-      senha: z.string(),
+      roleId: z.string(),
+      userName: z.string(),
+      password: z.string(),
     });
 
     const body = addEmployeeSchema.safeParse(request.body);
@@ -46,14 +51,20 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
+    const roleExists = await RoleRepository.findById(roleId);
+
+    if (!roleExists) {
+      return response.status(404).json({ error: "Cargo não encontrado" });
+    }
+
     const newEmployee = await EmployeeRepository.create({
       name,
       email,
       phone,
       address,
-      role,
-      login,
-      senha,
+      roleId,
+      userName,
+      password,
     });
     response.status(201).json(newEmployee);
   } catch (error) {
@@ -64,16 +75,17 @@ export const store: RequestHandler = async (request, response) => {
 export const update: RequestHandler = async (request, response) => {
   try {
     const { id } = request.params;
-    const { name, email, phone, address, role, login, senha } = request.body;
+    const { name, email, phone, address, roleId, userName, password } =
+      request.body;
 
     const updateEmployeeSchema = z.object({
       name: z.string(),
       email: z.string().email(),
       phone: z.string(),
       address: z.string(),
-      role: z.string(),
-      login: z.string(),
-      senha: z.string(),
+      roleId: z.string(),
+      userName: z.string(),
+      password: z.string(),
     });
 
     const body = updateEmployeeSchema.safeParse(request.body);
@@ -89,9 +101,9 @@ export const update: RequestHandler = async (request, response) => {
       email,
       phone,
       address,
-      role,
-      login,
-      senha,
+      roleId,
+      userName,
+      password,
     });
     if (!updatedEmployee) {
       return response.status(404).json({ error: "Funcionário não encontrado" });

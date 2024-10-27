@@ -136,21 +136,28 @@ export const validate: RequestHandler = async (req, res, next) => {
     return res.status(403).json({ error: "Token inválido" });
   }
 
-  const isValidToken = auth.validateToken(token);
-  if (!isValidToken) {
-    const user = await CompaniesRepository.findByAccessToken(token);
-    if (!user || !auth.validateRefreshToken(user?.refreshToken ?? "")) {
-      return res.status(403).json({ error: "Refresh token inválido" });
-    }
+  const validationResult = auth.validateToken(token);
+  if (!validationResult.valid) {
+    if (validationResult.reason === "expired") {
+      const user = await CompaniesRepository.findByAccessToken(token);
+      if (!user || !auth.validateRefreshToken(user?.refreshToken ?? "")) {
+        return res
+          .status(403)
+          .json({ error: "Token expirado e refresh token expirado" });
+      }
 
-    const newAccessToken = auth.getNewAccessToken(user?.refreshToken ?? "");
-    if (!newAccessToken) {
-      return res.status(403).json({ error: "Não foi possível gerar o token" });
-    }
+      const newAccessToken = auth.getNewAccessToken(user?.refreshToken ?? "");
+      if (!newAccessToken) {
+        return res
+          .status(403)
+          .json({ error: "Não foi possível gerar o token" });
+      }
 
-    res.setHeader("Authorization", `Bearer ${newAccessToken}`);
+      res.setHeader("Authorization", `Bearer ${newAccessToken}`);
+    } else {
+      return res.status(403).json({ error: "Token inválido" });
+    }
   }
-
   next();
 };
 

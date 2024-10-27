@@ -10,12 +10,19 @@ import * as sales from "../controllers/SalesController";
 import * as company from "../controllers/CompanyController";
 import * as soldItem from "../controllers/SoldItemController";
 import * as stock from "../controllers/StockController";
+import * as role from "../controllers/RoleController";
 import { sanitizeBody, validateId, validateUser } from "../middlewares";
 
 const router = Router();
 
 router.post("/login", auth.login);
 router.post("/refresh-token", auth.refreshToken);
+
+router.get("/roles", auth.validate, auth.validate, role.index);
+router.get("/roles/:id", auth.validate, role.show);
+router.post("/roles", auth.validate, role.store);
+router.put("/roles/:id", auth.validate, role.update);
+router.delete("/roles/:id", auth.validate, role.deleteRole);
 
 router.post("/send_code", auth.sendVerificationCode);
 router.post("/verify_password", auth.verifyCodeAndResetPassword);

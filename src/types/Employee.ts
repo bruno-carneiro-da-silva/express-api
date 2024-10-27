@@ -4,9 +4,9 @@ export interface IEmployee {
   email?: string;
   phone: string;
   address: string;
-  role: string;
-  login: string;
-  senha: string;
+  roleId: string;
+  userName: string;
+  password: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

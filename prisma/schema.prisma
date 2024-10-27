@@ -42,6 +42,7 @@ model Role {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
   companies   Company[]
+  employees   Employee[]
 }
 
 model Plan {
@@ -110,13 +111,14 @@ model Employee {
   email     String?  @unique
   phone     String
   address   String
-  role      String
-  login     String   @unique
-  senha     String
+  roleId    String
+  userName  String   @unique
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sales     Sale[]
   transactions Transaction[]
+  role      Role     @relation(fields: [roleId], references: [uId])
 }
 
 model Supplier {

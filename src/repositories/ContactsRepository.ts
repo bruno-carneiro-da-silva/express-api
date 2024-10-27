@@ -1,19 +1,34 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { IContact } from "../types/Contact";
 const prisma = new PrismaClient();
 
 class ContactsRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const skip = (page - 1) * limit;
+
+    const where: Prisma.ContactWhereInput | undefined = filter
+      ? {
+        OR: [
+          { name: { contains: filter, mode: 'insensitive' } },
+          { email: { contains: filter, mode: 'insensitive' } },
+          { phone: { contains: filter, mode: 'insensitive' } },
+          { address: { contains: filter, mode: 'insensitive' } },
+        ],
+      } as const
+      : undefined
+
     const contacts = await prisma.contact.findMany({
+      where,
       orderBy: {
         name: direction,
       },
       skip,
       take: limit,
     });
-    const total = await prisma.contact.count()
+
+    const total = await prisma.contact.count({ where })
+
     return { contacts, total };
   }
 

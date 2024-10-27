@@ -4,10 +4,10 @@ import ContactsRepository from "../repositories/ContactsRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy, page = "1" } = request.query;
+    const { orderBy, page = "1", filter = '' } = request.query;
     const per_page = 5
 
-    const { contacts, total } = await ContactsRepository.findAll(orderBy as string, Number(page), per_page)
+    const { contacts, total } = await ContactsRepository.findAll(orderBy as string, Number(page), per_page, filter as string)
 
     response.json({ contacts, total, per_page });
   } catch (error) {

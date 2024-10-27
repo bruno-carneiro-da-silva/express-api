@@ -42,7 +42,9 @@ export const store: RequestHandler = async (request, response) => {
       companyId: z.string(),
       totalPrice: z.number(),
       discount: z.number(),
-      soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
+      soldItems: z.array(
+        z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
+      ),
     });
 
     const body = addSaleSchema.safeParse(request.body);
@@ -87,7 +89,9 @@ export const update: RequestHandler = async (request, response) => {
       companyId: z.string(),
       totalPrice: z.number(),
       discount: z.number(),
-      soldItems: z.array(z.object({ productId: z.string(), qtd: z.number() })),
+      soldItems: z.array(
+        z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
+      ),
     });
     const idBody = updateIdSchema.safeParse(id);
     const body = updateSaleSchema.safeParse(request.body);

@@ -51,7 +51,7 @@ export const store: RequestHandler = async (request, response) => {
         message: "Número de telefone inválido",
       }),
       nameCompany: z.string(),
-      emailCompany: z.string(),
+      emailCompany: z.string().email({ message: "Email inválido" }),
       phoneNumberCompany: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
         message: "Número de telefone inválido",
       }),

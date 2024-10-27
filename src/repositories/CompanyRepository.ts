@@ -64,14 +64,13 @@ class CompaniesRepository {
   }
 
   async findByAccessToken(accessToken: string) {
-    const decoded = jwt.decode(accessToken) as { email: string };
-    const company = await prisma.company.findUnique({
-      where: { emailAdmin: decoded.email },
-      include: {
-        role: true,
-      },
+    const decoded = jwt.decode(accessToken) as { userId: string };
+    if (!decoded || !decoded.userId) {
+      throw new Error("Token inválido");
+    }
+    return prisma.company.findUnique({
+      where: { id: decoded.userId },
     });
-    return company;
   }
 
   async findByRefreshToken(refreshToken: string) {

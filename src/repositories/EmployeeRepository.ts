@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { IEmployee } from "../types/Employee";
+import bcrypt from "bcrypt";
+
 const prisma = new PrismaClient();
 
 class EmployeeRepository {
@@ -9,7 +11,16 @@ class EmployeeRepository {
       orderBy: {
         name: direction,
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+        roleId: true,
+        userName: true,
+        createdAt: true,
+        updatedAt: true,
         transactions: true,
         sales: true,
       },
@@ -20,7 +31,16 @@ class EmployeeRepository {
   async findById(id: string) {
     const employee = await prisma.employee.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+        roleId: true,
+        userName: true,
+        createdAt: true,
+        updatedAt: true,
         transactions: true,
         sales: true,
       },
@@ -31,7 +51,16 @@ class EmployeeRepository {
   async findByEmail(email: string) {
     const employee = await prisma.employee.findUnique({
       where: { email },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        address: true,
+        roleId: true,
+        userName: true,
+        createdAt: true,
+        updatedAt: true,
         transactions: true,
         sales: true,
       },
@@ -39,25 +68,36 @@ class EmployeeRepository {
     return employee;
   }
 
-  async create({ name, email, phone, address, role, login, senha }: IEmployee) {
+  async create({
+    name,
+    email,
+    phone,
+    address,
+    roleId,
+    userName,
+    password,
+  }: IEmployee) {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const employee = await prisma.employee.create({
       data: {
         name,
         email,
         phone,
         address,
-        role,
-        login,
-        senha,
+        roleId,
+        userName,
+        password: hashedPassword,
       },
     });
-    return employee;
+    const { password: _, ...employeeWithoutPassword } = employee;
+    return employeeWithoutPassword;
   }
 
   async update(
     id: string,
-    { name, email, phone, address, role, login, senha }: IEmployee
+    { name, email, phone, address, roleId, userName, password }: IEmployee
   ) {
+    const hashedUpdatePassword = await bcrypt.hash(password, 10);
     const employee = await prisma.employee.update({
       where: { id },
       data: {
@@ -65,12 +105,13 @@ class EmployeeRepository {
         email,
         phone,
         address,
-        role,
-        login,
-        senha,
+        roleId,
+        userName,
+        password: hashedUpdatePassword,
       },
     });
-    return employee;
+    const { password: _, ...employeeWithoutPassword } = employee;
+    return employeeWithoutPassword;
   }
 
   async delete(id: string) {

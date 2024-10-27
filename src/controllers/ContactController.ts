@@ -1,13 +1,15 @@
 import { RequestHandler } from "express";
-import ContactsRepository from "../repositories/ContactsRepository";
 import { z } from "zod";
-import errorMap from "zod/lib/locales/en";
+import ContactsRepository from "../repositories/ContactsRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy } = request.query;
-    const contacts = await ContactsRepository.findAll(orderBy as string);
-    response.json(contacts);
+    const { orderBy, page = "1" } = request.query;
+    const per_page = 5
+
+    const { contacts, total } = await ContactsRepository.findAll(orderBy as string, Number(page), per_page)
+
+    response.json({ contacts, total, per_page });
   } catch (error) {
     response.status(500).json({ error: "Erro ao buscar contatos" });
   }

@@ -3,14 +3,18 @@ import { IContact } from "../types/Contact";
 const prisma = new PrismaClient();
 
 class ContactsRepository {
-  async findAll(orderBy = "ASC") {
+  async findAll(orderBy = "ASC", page: number, limit: number) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
+    const skip = (page - 1) * limit;
     const contacts = await prisma.contact.findMany({
       orderBy: {
         name: direction,
       },
+      skip,
+      take: limit,
     });
-    return contacts;
+    const total = await prisma.contact.count()
+    return { contacts, total };
   }
 
   async findById(id: string) {

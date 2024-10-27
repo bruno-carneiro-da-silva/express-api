@@ -16,9 +16,6 @@ class ContactsRepository {
   async findById(id: string) {
     const contact = await prisma.contact.findUnique({
       where: { id },
-      include: {
-        category: true,
-      },
     });
     return contact;
   }

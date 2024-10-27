@@ -14,14 +14,14 @@ export const index: RequestHandler = async (request, response) => {
 
 export const show: RequestHandler = async (request, response) => {
   try {
-    const { id } = request.params;
-    const idSchema = z.string();
-    const body = idSchema.safeParse(id);
+    const idSchema = z.object({ id: z.string() });
+    const body = idSchema.safeParse(request.params);
 
     if (!body.success) {
       return response.status(400).json({ error: "ID inválido" });
     }
 
+    const id = body.data.id
     const contact = await ContactsRepository.findById(id);
     if (!contact) {
       return response.status(404).json({ error: "Contato não encontrado" });
@@ -123,7 +123,7 @@ export const deleteContact: RequestHandler = async (request, response) => {
     }
 
     const id = body.data.id
-    
+
     await ContactsRepository.delete(id);
     response.sendStatus(204);
   } catch (error) {

@@ -41,7 +41,6 @@ export const store: RequestHandler = async (request, response) => {
       employeeId: z.string(),
       companyId: z.string(),
       totalPrice: z.number(),
-      discount: z.number(),
       soldItems: z.array(
         z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
       ),

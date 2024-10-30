@@ -9,10 +9,21 @@ class SalesRepository {
       orderBy: {
         createdAt: orderBy === "desc" ? "desc" : "asc",
       },
-      include: {
-        employee: true,
-        company: true,
+      select: {
         soldItems: true,
+        employee: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            userName: true,
+            email: true,
+          },
+        },
+        totalPrice: true,
+        discount: true,
+        companyId: true,
+        id: true,
       },
     });
   }
@@ -28,7 +39,13 @@ class SalesRepository {
     });
   }
 
-  async create({ employeeId, companyId, totalPrice, discount, soldItems }: ISale) {
+  async create({
+    employeeId,
+    companyId,
+    totalPrice,
+    discount,
+    soldItems,
+  }: ISale) {
     // Verificar se a quantidade solicitada está disponível no estoque
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({

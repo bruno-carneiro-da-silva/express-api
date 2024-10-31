@@ -130,7 +130,7 @@ model Supplier {
   dateOfBirth     DateTime
   nationality     String
   niche           String
-  photo           String
+  photo_base64    String?  @db.Text
   city            String
   startContractDate DateTime
   endContractDate DateTime

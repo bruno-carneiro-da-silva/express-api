@@ -82,33 +82,8 @@ class CompaniesRepository {
   async findByEmail(email: string) {
     const company = await prisma.company.findUnique({
       where: { emailAdmin: email },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        emailAdmin: true,
-        phoneNumberAdmin: true,
-        nameCompany: true,
-        emailCompany: true,
-        phoneNumberCompany: true,
-        addressCompany: true,
-        terms: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        planId: true,
-        password: false,
-        refreshToken: true,
-        verificationCode: false,
-        verificationCodeExpiresAt: false,
-        photo_base64: true,
-        _count: {
-          select: { contacts: true, suppliers: true, sales: true },
-        },
+      include: {
+        role: true,
       },
     });
     return company;

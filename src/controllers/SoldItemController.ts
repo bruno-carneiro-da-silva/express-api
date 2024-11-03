@@ -9,7 +9,7 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy } = request.query;
     const soldItems = await SoldItemRepository.findAll(orderBy as string);
     return response.json(soldItems);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar itens vendidos" });
   }
 };
@@ -32,7 +32,7 @@ export const show: RequestHandler = async (request, response) => {
         .json({ error: "Item vendido não encontrado" });
     }
     response.json(soldItem);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar item vendido" });
   }
 };
@@ -74,7 +74,7 @@ export const store: RequestHandler = async (request, response) => {
       price,
     });
     response.status(201).json(soldItem);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar item vendido" });
   }
 };
@@ -127,7 +127,7 @@ export const update: RequestHandler = async (request, response) => {
       price,
     });
     response.json(soldItem);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar item vendido" });
   }
 };
@@ -151,7 +151,7 @@ export const deleteSoldItem: RequestHandler = async (request, response) => {
 
     await SoldItemRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar item vendido" });
   }
 };

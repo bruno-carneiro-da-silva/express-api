@@ -4,11 +4,23 @@ import { z } from "zod";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy } = request.query;
-    const users = await CompaniesRepository.findAll(orderBy as string);
-    return response.json(users);
-  } catch (error) {
-    response.status(500).json({ error: "Erro ao buscar usuários" });
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const company = await CompaniesRepository.findByAccessToken(token);
+
+    if (!company) {
+      return response.status(404).json({ error: "Empresa não encontrada" });
+    }
+
+    const { refreshToken, ...companyWithoutRefreshToken } = company;
+
+    return response.json(companyWithoutRefreshToken);
+  } catch {
+    response.status(500).json({ error: "Erro ao buscar empresa" });
   }
 };
 
@@ -23,8 +35,7 @@ export const show: RequestHandler = async (request, response) => {
     const { refreshToken, ...companyWithoutRefreshToken } = company;
 
     response.json(companyWithoutRefreshToken);
-  } catch (error) {
-    console.log(error);
+  } catch {
     response.status(500).json({ error: "Erro ao buscar usuário" });
   }
 };
@@ -105,13 +116,7 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const {
-      address,
-      email,
-      name,
-      phoneNumber,
-      photo,
-    } = request.body;
+    const { address, email, name, phoneNumber, photo } = request.body;
     const { id } = request.params;
 
     const updateCompanySchema = z.object({
@@ -127,7 +132,7 @@ export const update: RequestHandler = async (request, response) => {
     const body = updateCompanySchema.safeParse(request.body);
 
     if (!body.success) {
-      console.log(body.error)
+      console.log(body.error);
       return response
         .status(400)
         .json({ error: "Todos os campos são obrigatórios" });
@@ -155,7 +160,7 @@ export const update: RequestHandler = async (request, response) => {
 
     const { password: _, ...userWithoutPassword } = company;
     response.json(userWithoutPassword);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar usuário" });
   }
 };
@@ -179,7 +184,7 @@ export const deleteUser: RequestHandler = async (request, response) => {
     }
     await CompaniesRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar usuário" });
   }
 };

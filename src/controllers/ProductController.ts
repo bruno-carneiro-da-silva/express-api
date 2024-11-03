@@ -9,7 +9,7 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy } = request.query;
     const products = await ProductRepository.findAll(orderBy as string);
     return response.json(products);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -32,7 +32,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Produto inexistente" });
     }
     response.json(product);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar o produto" });
   }
 };
@@ -100,7 +100,7 @@ export const store: RequestHandler = async (request, response) => {
     });
 
     response.json(product);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -187,7 +187,7 @@ export const update: RequestHandler = async (request, response) => {
     }
 
     response.json(product);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -218,7 +218,7 @@ export const deleteProduct: RequestHandler = async (request, response) => {
 
     await ProductRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };

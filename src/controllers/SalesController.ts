@@ -27,7 +27,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Pedido não encontrado" });
     }
     response.json(sale);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar a venda" });
   }
 };
@@ -72,7 +72,7 @@ export const store: RequestHandler = async (request, response) => {
       soldItems,
     });
     response.status(201).json(sale);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar a venda" });
   }
 };
@@ -127,7 +127,7 @@ export const update: RequestHandler = async (request, response) => {
       soldItems,
     });
     response.status(201).json(sale);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar a venda" });
   }
 };
@@ -149,7 +149,7 @@ export const deleteSale: RequestHandler = async (request, response) => {
     }
     await SalesRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar a venda" });
   }
 };

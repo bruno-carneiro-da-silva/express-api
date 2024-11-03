@@ -6,7 +6,7 @@ export const index: RequestHandler = async (request, response) => {
   try {
     const categories = await CategoriesRepository.findAll();
     response.json(categories);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar categorias" });
   }
 };
@@ -27,7 +27,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Categoria não encontrada" });
     }
     response.json(category);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar categoria" });
   }
 };
@@ -49,7 +49,7 @@ export const store: RequestHandler = async (request, response) => {
 
     const category = await CategoriesRepository.create({ name });
     response.status(201).json(category);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar categoria" });
   }
 };
@@ -82,7 +82,7 @@ export const update: RequestHandler = async (request, response) => {
 
     const category = await CategoriesRepository.update(id, { name });
     response.json(category);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar categoria" });
   }
 };
@@ -100,7 +100,7 @@ export const deleteCategory: RequestHandler = async (request, response) => {
 
     await CategoriesRepository.delete(id);
     response.json({ message: "Categoria deletada" });
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar categoria" });
   }
 };

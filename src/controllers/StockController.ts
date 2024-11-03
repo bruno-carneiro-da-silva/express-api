@@ -8,7 +8,7 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy } = request.query;
     const productStocks = await StockRepository.findAll(orderBy as string);
     return response.json(productStocks);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar itens do estoque" });
   }
 };
@@ -32,7 +32,7 @@ export const show: RequestHandler = async (request, response) => {
         .json({ error: "Item do estoque não encontrado" });
     }
     response.json(stock);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar item do estoque" });
   }
 };
@@ -75,7 +75,7 @@ export const store: RequestHandler = async (request, response) => {
       minStock,
     });
     response.json(stock);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar item do estoque" });
   }
 };
@@ -121,7 +121,7 @@ export const update: RequestHandler = async (request, response) => {
       minStock,
     });
     response.json(stock);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar item do estoque" });
   }
 };
@@ -146,7 +146,7 @@ export const deleteStock: RequestHandler = async (request, response) => {
 
     await StockRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar item do estoque" });
   }
 };

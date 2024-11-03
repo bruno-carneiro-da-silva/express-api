@@ -1,16 +1,16 @@
 import { PrismaClient } from "@prisma/client";
-import { IUser } from "../types/User";
+import { ICompany } from "../types/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
 class CompaniesRepository {
-  async findAll(orderBy = "ASC") {
+  async findAll(orderBy: "ASC" | "DESC") {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const companies = await prisma.company.findMany({
       orderBy: {
-        emailAdmin: direction,
+        nameCompany: direction,
       },
       select: {
         id: true,
@@ -32,9 +32,10 @@ class CompaniesRepository {
         updatedAt: true,
         planId: true,
         password: false,
-        refreshToken: false,
+        refreshToken: true,
         verificationCode: false,
         verificationCodeExpiresAt: false,
+        photo_base64: true,
         _count: {
           select: { contacts: true, suppliers: true, sales: true },
         },
@@ -70,6 +71,34 @@ class CompaniesRepository {
     }
     return prisma.company.findUnique({
       where: { id: decoded.userId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        emailAdmin: true,
+        phoneNumberAdmin: true,
+        nameCompany: true,
+        emailCompany: true,
+        phoneNumberCompany: true,
+        addressCompany: true,
+        terms: true,
+        role: {
+          select: {
+            name: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+        planId: true,
+        password: false,
+        refreshToken: true,
+        verificationCode: false,
+        verificationCodeExpiresAt: false,
+        photo_base64: true,
+        _count: {
+          select: { contacts: true, suppliers: true, sales: true },
+        },
+      },
     });
   }
 
@@ -105,7 +134,7 @@ class CompaniesRepository {
     password,
     roleId,
     photo,
-  }: IUser & { roleId: number }) {
+  }: ICompany & { roleId: number }) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const company = await prisma.company.create({
       data: {
@@ -140,7 +169,7 @@ class CompaniesRepository {
       phoneNumberCompany,
       addressCompany,
       photo,
-    }: Partial<IUser & { roleId: number }>
+    }: Partial<ICompany & { roleId: number }>
   ) {
     // const hashedPassword = await bcrypt.hash(password, 10);
     const company = await prisma.company.update({

@@ -16,6 +16,7 @@ class SalesRepository {
             id: true,
             name: true,
             phone: true,
+            password: false,
             userName: true,
             email: true,
           },
@@ -32,7 +33,16 @@ class SalesRepository {
     return prisma.sale.findUnique({
       where: { id },
       include: {
-        employee: true,
+        employee: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            password: false,
+            userName: true,
+            email: true,
+          },
+        },
         company: true,
         soldItems: true,
       },
@@ -46,7 +56,6 @@ class SalesRepository {
     discount,
     soldItems,
   }: ISale) {
-    // Verificar se a quantidade solicitada está disponível no estoque
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({
         where: { productId: item.productId },

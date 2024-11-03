@@ -7,7 +7,7 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy } = request.query;
     const roles = await RoleRepository.findAll(orderBy as string);
     response.json(roles);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -20,7 +20,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Cargo não encontrado" });
     }
     response.json(role);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -55,7 +55,7 @@ export const store: RequestHandler = async (request, response) => {
       permissions,
     });
     response.status(201).json(newEmployee);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -93,7 +93,7 @@ export const update: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Cargo não encontrado" });
     }
     response.json(updatedRole);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -111,7 +111,7 @@ export const deleteRole: RequestHandler = async (request, response) => {
     await RoleRepository.delete(id);
 
     response.json({ message: "Funcionário deletado com sucesso" });
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };

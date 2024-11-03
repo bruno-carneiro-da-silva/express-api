@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { IEmployee } from "../types/Employee";
 import bcrypt from "bcrypt";
+import { employeeSelect } from "../utils/selectors";
 
 const prisma = new PrismaClient();
 
@@ -11,20 +12,7 @@ class EmployeeRepository {
       orderBy: {
         name: direction,
       },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        roleId: true,
-        password: false,
-        userName: true,
-        createdAt: true,
-        updatedAt: true,
-        transactions: true,
-        sales: true,
-      },
+      select: employeeSelect,
     });
     return employees;
   }
@@ -32,20 +20,7 @@ class EmployeeRepository {
   async findById(id: string) {
     const employee = await prisma.employee.findUnique({
       where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        roleId: true,
-        password: false,
-        userName: true,
-        createdAt: true,
-        updatedAt: true,
-        transactions: true,
-        sales: true,
-      },
+      select: employeeSelect,
     });
     return employee;
   }
@@ -53,20 +28,7 @@ class EmployeeRepository {
   async findByEmail(email: string) {
     const employee = await prisma.employee.findUnique({
       where: { email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        address: true,
-        roleId: true,
-        password: false,
-        userName: true,
-        createdAt: true,
-        updatedAt: true,
-        transactions: true,
-        sales: true,
-      },
+      select: employeeSelect,
     });
     return employee;
   }

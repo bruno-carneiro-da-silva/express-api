@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { IProduct } from "../types/Product";
+import { productSelect } from "../utils/selectors";
 const prisma = new PrismaClient();
 
 class ProductRepository {
@@ -8,13 +9,13 @@ class ProductRepository {
 
     const skip = (page - 1) * limit;
     const where: Prisma.ProductWhereInput | undefined = filter
-      ? {
-        OR: [
-          { name: { contains: filter, mode: 'insensitive' } },
-          { description: { contains: filter, mode: 'insensitive' } },
-        ],
-      } as const
-      : undefined
+      ? ({
+          OR: [
+            { name: { contains: filter, mode: "insensitive" } },
+            { description: { contains: filter, mode: "insensitive" } },
+          ],
+        } as const)
+      : undefined;
 
     const products = await prisma.product.findMany({
       where,
@@ -23,16 +24,10 @@ class ProductRepository {
       },
       skip,
       take: limit,
-      include: {
-        category: true,
-        stock: true,
-        soldItems: true,
-        transactions: true,
-        photos: true,
-      },
+      include: productSelect,
     });
 
-    const total = await prisma.product.count({ where })
+    const total = await prisma.product.count({ where });
 
     return { products, total };
   }
@@ -40,13 +35,7 @@ class ProductRepository {
   async findById(id: string) {
     const product = await prisma.product.findUnique({
       where: { id },
-      include: {
-        category: true,
-        stock: true,
-        soldItems: true,
-        transactions: true,
-        photos: true,
-      },
+      include: productSelect,
     });
     return product;
   }
@@ -54,13 +43,7 @@ class ProductRepository {
   async findByCategoryId(categoryId: string) {
     const products = await prisma.product.findMany({
       where: { categoryId },
-      include: {
-        category: true,
-        stock: true,
-        soldItems: true,
-        transactions: true,
-        photos: true,
-      },
+      include: productSelect,
     });
     return products;
   }
@@ -86,7 +69,7 @@ class ProductRepository {
         name,
         description,
         qtd: 0,
-        size: '',
+        size: "",
         price,
         categoryId,
         photos: {
@@ -145,7 +128,7 @@ class ProductRepository {
         price,
         description,
         qtd: 0,
-        size: '',
+        size: "",
         photos: {
           deleteMany: {},
           create: photos.map((base64: string) => ({ base64 })),
@@ -178,19 +161,19 @@ class ProductRepository {
   }
 
   async delete(id: string) {
-    const notify = this.checkStockAndNotify
+    const notify = this.checkStockAndNotify;
     const result = await prisma.$transaction(async (prisma) => {
       await prisma.photo.deleteMany({ where: { productId: id } });
-  
+
       const product = await prisma.product.delete({
         where: { id },
       });
-  
+
       await notify(id);
-  
+
       return product;
     });
-  
+
     return result;
   }
 }

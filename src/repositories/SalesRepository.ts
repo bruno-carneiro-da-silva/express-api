@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { ISale } from "../types/Sale";
+import { saleCompanySelect, employeeSelect } from "../utils/selectors";
 
 const prisma = new PrismaClient();
 
@@ -12,14 +13,7 @@ class SalesRepository {
       select: {
         soldItems: true,
         employee: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            password: false,
-            userName: true,
-            email: true,
-          },
+          select: employeeSelect,
         },
         totalPrice: true,
         discount: true,
@@ -34,16 +28,11 @@ class SalesRepository {
       where: { id },
       include: {
         employee: {
-          select: {
-            id: true,
-            name: true,
-            phone: true,
-            password: false,
-            userName: true,
-            email: true,
-          },
+          select: employeeSelect,
         },
-        company: true,
+        company: {
+          select: saleCompanySelect,
+        },
         soldItems: true,
       },
     });
@@ -83,8 +72,12 @@ class SalesRepository {
         },
       },
       include: {
-        employee: true,
-        company: true,
+        employee: {
+          select: employeeSelect,
+        },
+        company: {
+          select: saleCompanySelect,
+        },
         soldItems: true,
       },
     });
@@ -138,8 +131,12 @@ class SalesRepository {
         },
       },
       include: {
-        employee: true,
-        company: true,
+        employee: {
+          select: employeeSelect,
+        },
+        company: {
+          select: saleCompanySelect,
+        },
         soldItems: true,
       },
     });

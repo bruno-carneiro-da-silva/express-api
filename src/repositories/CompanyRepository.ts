@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { ICompany } from "../types/User";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { companySelect } from "../utils/selectors";
 
 const prisma = new PrismaClient();
 
@@ -12,34 +13,7 @@ class CompaniesRepository {
       orderBy: {
         nameCompany: direction,
       },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        emailAdmin: true,
-        phoneNumberAdmin: true,
-        nameCompany: true,
-        emailCompany: true,
-        phoneNumberCompany: true,
-        addressCompany: true,
-        terms: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        planId: true,
-        password: false,
-        refreshToken: true,
-        verificationCode: false,
-        verificationCodeExpiresAt: false,
-        photo_base64: true,
-        _count: {
-          select: { contacts: true, suppliers: true, sales: true },
-        },
-      },
+      select: companySelect,
     });
     return companies;
   }
@@ -47,34 +21,7 @@ class CompaniesRepository {
   async findById(id: string) {
     const company = await prisma.company.findUnique({
       where: { id },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        emailAdmin: true,
-        phoneNumberAdmin: true,
-        nameCompany: true,
-        emailCompany: true,
-        phoneNumberCompany: true,
-        addressCompany: true,
-        terms: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        planId: true,
-        password: false,
-        refreshToken: true,
-        verificationCode: false,
-        verificationCodeExpiresAt: false,
-        photo_base64: true,
-        _count: {
-          select: { contacts: true, suppliers: true, sales: true },
-        },
-      },
+      select: companySelect,
     });
     return company;
   }
@@ -96,34 +43,7 @@ class CompaniesRepository {
     }
     return prisma.company.findUnique({
       where: { id: decoded.userId },
-      select: {
-        id: true,
-        firstName: true,
-        lastName: true,
-        emailAdmin: true,
-        phoneNumberAdmin: true,
-        nameCompany: true,
-        emailCompany: true,
-        phoneNumberCompany: true,
-        addressCompany: true,
-        terms: true,
-        role: {
-          select: {
-            name: true,
-          },
-        },
-        createdAt: true,
-        updatedAt: true,
-        planId: true,
-        password: false,
-        refreshToken: true,
-        verificationCode: false,
-        verificationCodeExpiresAt: false,
-        photo_base64: true,
-        _count: {
-          select: { contacts: true, suppliers: true, sales: true },
-        },
-      },
+      select: companySelect,
     });
   }
 

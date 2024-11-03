@@ -89,7 +89,6 @@ class SalesRepository {
       },
     });
 
-    // Atualizar o estoque dos produtos vendidos
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({
         where: { productId: item.productId },
@@ -111,7 +110,6 @@ class SalesRepository {
     id: string,
     { employeeId, companyId, totalPrice, discount, soldItems }: ISale
   ) {
-    // Verificar se a quantidade solicitada está disponível no estoque
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({
         where: { productId: item.productId },

@@ -34,12 +34,10 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { employeeId, companyId, totalPrice, discount, soldItems } =
-      request.body;
-
     const addSaleSchema = z.object({
       employeeId: z.string(),
       companyId: z.string(),
+      discount: z.number(),
       totalPrice: z.number(),
       soldItems: z.array(
         z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
@@ -47,12 +45,15 @@ export const store: RequestHandler = async (request, response) => {
     });
 
     const body = addSaleSchema.safeParse(request.body);
-
     if (!body.success) {
       return response.status(400).json({
-        error: "Todos os campos são obrigatórios e soldItems deve ser um array",
+        error: "Todos os campos são obrigatórios",
+        details: body.error.errors,
       });
     }
+
+    const { employeeId, companyId, totalPrice, discount, soldItems } =
+      body.data;
 
     const employeeExists = await EmployeeRepository.findById(employeeId);
     const companyExists = await CompaniesRepository.findById(companyId);

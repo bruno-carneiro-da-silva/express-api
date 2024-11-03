@@ -6,13 +6,18 @@ import SupplierRepository from "../repositories/SupplierRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy, page = "1", filter = '' } = request.query;
-    const per_page = 4
+    const { orderBy, page = "1", filter = "" } = request.query;
+    const per_page = 4;
 
-    const { suppliers, total } = await SupplierRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+    const { suppliers, total } = await SupplierRepository.findAll(
+      orderBy as string,
+      Number(page),
+      per_page,
+      filter as string
+    );
 
     return response.json({ suppliers, total, per_page });
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };
@@ -34,7 +39,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Fornecedor não existe" });
     }
     response.json(supplier);
-  } catch (error) {
+  } catch {
     response
       .status(500)
       .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
@@ -58,7 +63,7 @@ export const showByCnpj: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Fornecedor não existe" });
     }
     response.json(supplier);
-  } catch (error) {
+  } catch {
     response
       .status(500)
       .json({ error: "Erro ao buscar fornecedor, tente mais tarde" });
@@ -155,7 +160,7 @@ export const store: RequestHandler = async (request, response) => {
     });
 
     return response.status(201).json(supplier);
-  } catch (error) {
+  } catch {
     response
       .status(500)
       .json({ error: "Erro ao criar o fornecedor, tente mais tarde" });
@@ -247,7 +252,7 @@ export const update: RequestHandler = async (request, response) => {
       userId: decoded.userId,
     });
     response.json(supplier);
-  } catch (error) {
+  } catch {
     response
       .status(500)
       .json({ error: "Erro ao atualizar o fornecedor, tente mais tarde" });
@@ -273,7 +278,7 @@ export const deleteSupplier: RequestHandler = async (request, response) => {
 
     await SupplierRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response
       .status(500)
       .json({ error: "Erro ao tentar deletar o fornecedor, tente mais tarde" });

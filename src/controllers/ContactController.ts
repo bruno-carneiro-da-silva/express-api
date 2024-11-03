@@ -4,13 +4,18 @@ import ContactsRepository from "../repositories/ContactsRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy, page = "1", filter = '' } = request.query;
-    const per_page = 5
+    const { orderBy, page = "1", filter = "" } = request.query;
+    const per_page = 5;
 
-    const { contacts, total } = await ContactsRepository.findAll(orderBy as string, Number(page), per_page, filter as string)
+    const { contacts, total } = await ContactsRepository.findAll(
+      orderBy as string,
+      Number(page),
+      per_page,
+      filter as string
+    );
 
     response.json({ contacts, total, per_page });
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar contatos" });
   }
 };
@@ -24,20 +29,30 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "ID inválido" });
     }
 
-    const id = body.data.id
+    const id = body.data.id;
     const contact = await ContactsRepository.findById(id);
     if (!contact) {
       return response.status(404).json({ error: "Contato não encontrado" });
     }
     response.json(contact);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar contato" });
   }
 };
 
 export const store: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, address, zip, birthday, latitude, longitude, companyId } = request.body;
+    const {
+      name,
+      email,
+      phone,
+      address,
+      zip,
+      birthday,
+      latitude,
+      longitude,
+      companyId,
+    } = request.body;
 
     const addContactSchema = z.object({
       name: z.string(),
@@ -75,14 +90,24 @@ export const store: RequestHandler = async (request, response) => {
       companyId,
     });
     response.status(201).json(contact);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar contato" });
   }
 };
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { name, email, phone, address, zip, birthday, latitude, longitude, companyId } = request.body;
+    const {
+      name,
+      email,
+      phone,
+      address,
+      zip,
+      birthday,
+      latitude,
+      longitude,
+      companyId,
+    } = request.body;
     const idSchema = z.object({ id: z.string() });
     const updateContactSchema = z.object({
       name: z.string(),
@@ -107,7 +132,7 @@ export const update: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const id = idBody.data.id
+    const id = idBody.data.id;
     const contactExists = await ContactsRepository.findById(id);
 
     if (!contactExists) {
@@ -126,7 +151,7 @@ export const update: RequestHandler = async (request, response) => {
       companyId,
     });
     response.json(contact);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar contato" });
   }
 };
@@ -141,11 +166,11 @@ export const deleteContact: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "ID inválido" });
     }
 
-    const id = body.data.id
+    const id = body.data.id;
 
     await ContactsRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar contato" });
   }
 };

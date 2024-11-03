@@ -10,7 +10,7 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy } = request.query;
     const transactions = await TransactionRepository.findAll(orderBy as string);
     return response.json(transactions);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar transações" });
   }
 };
@@ -31,7 +31,7 @@ export const show: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Transação inexistente" });
     }
     response.json(transaction);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao buscar transação" });
   }
 };
@@ -91,7 +91,7 @@ export const store: RequestHandler = async (request, response) => {
       selledPrice,
     });
     response.json(transaction);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao criar transação" });
   }
 };
@@ -158,7 +158,7 @@ export const update: RequestHandler = async (request, response) => {
       selledPrice,
     });
     response.json(transaction);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao atualizar transação" });
   }
 };
@@ -181,7 +181,7 @@ export const deleteTransaction: RequestHandler = async (request, response) => {
 
     await TransactionRepository.delete(id);
     response.sendStatus(204);
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro ao deletar transação" });
   }
 };

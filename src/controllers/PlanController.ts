@@ -6,7 +6,7 @@ export const createPlan: RequestHandler = async (req, res) => {
     const { name, description, price } = req.body;
     const plan = await PlanRepository.createPlan(name, description, price);
     res.json(plan);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Erro ao criar plano" });
   }
 };
@@ -20,7 +20,7 @@ export const addFeatureToPlan: RequestHandler = async (req, res) => {
       featureDescription
     );
     res.json(feature);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Erro ao adicionar recurso ao plano" });
   }
 };
@@ -35,7 +35,7 @@ export const addPriceToPlan: RequestHandler = async (req, res) => {
       benefits
     );
     res.json(price);
-  } catch (error) {
+  } catch {
     res.status(500).json({ error: "Erro ao adicionar preço ao plano" });
   }
 };

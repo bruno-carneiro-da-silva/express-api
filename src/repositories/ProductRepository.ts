@@ -1,14 +1,28 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { IProduct } from "../types/Product";
 const prisma = new PrismaClient();
 
 class ProductRepository {
-  async findAll(orderBy = "ASC") {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
+
+    const skip = (page - 1) * limit;
+    const where: Prisma.ProductWhereInput | undefined = filter
+      ? {
+        OR: [
+          { name: { contains: filter, mode: 'insensitive' } },
+          { description: { contains: filter, mode: 'insensitive' } },
+        ],
+      } as const
+      : undefined
+
     const products = await prisma.product.findMany({
+      where,
       orderBy: {
         name: direction,
       },
+      skip,
+      take: limit,
       include: {
         category: true,
         stock: true,
@@ -17,7 +31,10 @@ class ProductRepository {
         photos: true,
       },
     });
-    return products;
+
+    const total = await prisma.product.count({ where })
+
+    return { products, total };
   }
 
   async findById(id: string) {
@@ -57,9 +74,9 @@ class ProductRepository {
 
   async create({
     name,
-    qtd,
     description,
-    size,
+    // qtd,
+    // size,
     price,
     categoryId,
     photos,
@@ -67,13 +84,13 @@ class ProductRepository {
     const product = await prisma.product.create({
       data: {
         name,
-        qtd,
         description,
-        size,
+        qtd: 0,
+        size: '',
         price,
         categoryId,
         photos: {
-          create: photos.map((url: string) => ({ url })),
+          create: photos.map((base64: string) => ({ base64 })),
         },
       },
       include: {
@@ -99,59 +116,58 @@ class ProductRepository {
     id: string,
     {
       name,
-      qtd,
       price,
       description,
-      size,
+      // qtd,
+      // size,
       photos,
       categoryId,
       minStock,
     }: IProduct
   ) {
+    // const existingPhotos = await prisma.photo.findMany({
+    //   where: { productId: id },
+    // });
 
-    const existingPhotos = await prisma.photo.findMany({
-      where: { productId: id },
-    });
+    // const photosToRemove = existingPhotos.filter(
+    //   (existingPhoto) => !photos.includes(existingPhoto.base64)
+    // );
 
-    const photosToRemove = existingPhotos.filter(
-      (existingPhoto) => !photos.includes(existingPhoto.url)
-    );
-
-    const photosToAdd = photos.filter(
-      (url) =>
-        !existingPhotos.some((existingPhoto) => existingPhoto.url === url)
-    );
+    // const photosToAdd = photos.filter(
+    //   (base64) =>
+    //     !existingPhotos.some((existingPhoto) => existingPhoto.base64 === base64)
+    // );
 
     const product = await prisma.product.update({
       where: { id },
       data: {
         name,
-        qtd,
         price,
         description,
-        size,
+        qtd: 0,
+        size: '',
         photos: {
           deleteMany: {},
-          create: photos.map((url: string) => ({ url })),
+          create: photos.map((base64: string) => ({ base64 })),
         },
         categoryId,
       },
     });
 
-    await prisma.photo.deleteMany({
-      where: {
-        id: { in: photosToRemove.map((photo) => photo.id) },
-      },
-    });
+    // await prisma.photo.deleteMany({
+    //   where: {
+    //     id: { in: photosToRemove.map((photo) => photo.id) },
+    //   },
+    // });
 
-    await prisma.photo.createMany({
-      data: photosToAdd.map((url) => ({ url, productId: id })),
-    });
+    // await prisma.photo.createMany({
+    //   data: photosToAdd.map((url) => ({ url, productId: id })),
+    // });
 
     await prisma.stock.update({
       where: { productId: id },
       data: {
-        qtd,
+        qtd: 0,
         minStock,
       },
     });
@@ -162,13 +178,20 @@ class ProductRepository {
   }
 
   async delete(id: string) {
-    const product = await prisma.product.delete({
-      where: { id },
+    const notify = this.checkStockAndNotify
+    const result = await prisma.$transaction(async (prisma) => {
+      await prisma.photo.deleteMany({ where: { productId: id } });
+  
+      const product = await prisma.product.delete({
+        where: { id },
+      });
+  
+      await notify(id);
+  
+      return product;
     });
-
-    await this.checkStockAndNotify(id);
-
-    return product;
+  
+    return result;
   }
 }
 

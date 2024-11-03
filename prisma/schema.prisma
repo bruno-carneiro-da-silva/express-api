@@ -163,7 +163,7 @@ model Product {
 
 model Photo {
   id         String   @id @default(uuid())
-  url        String
+  base64     String   @db.Text
   productId  String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())

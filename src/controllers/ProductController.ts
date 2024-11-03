@@ -6,9 +6,12 @@ import CategoriesRepository from "../repositories/CategoriesRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy } = request.query;
-    const products = await ProductRepository.findAll(orderBy as string);
-    return response.json(products);
+    const { orderBy, page = "1", filter = '' } = request.query;
+    const per_page = 4
+
+    const { products, total } = await ProductRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+
+    return response.json({ products, total, per_page });
   } catch (error) {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
@@ -42,8 +45,8 @@ export const store: RequestHandler = async (request, response) => {
     const {
       name,
       description,
-      size,
-      qtd,
+      // size,
+      // qtd,
       price,
       categoryId,
       photos,
@@ -54,8 +57,8 @@ export const store: RequestHandler = async (request, response) => {
     const addProductSchema = z.object({
       name: z.string(),
       description: z.string(),
-      size: z.string(),
-      qtd: z.number(),
+      // size: z.string(),
+      // qtd: z.number(),
       price: z.number(),
       categoryId: z.string(),
       photos: z.array(z.string()),
@@ -85,8 +88,8 @@ export const store: RequestHandler = async (request, response) => {
     const product = await ProductRepository.create({
       name,
       description,
-      size,
-      qtd,
+      // size,
+      qtd: 0,
       price,
       categoryId,
       photos,
@@ -95,7 +98,7 @@ export const store: RequestHandler = async (request, response) => {
     await StockRepository.create({
       productId: product.id,
       capacity,
-      qtd,
+      qtd: 0,
       minStock,
     });
 
@@ -109,9 +112,9 @@ export const update: RequestHandler = async (request, response) => {
   try {
     const {
       name,
-      qtd,
       description,
-      size,
+      // qtd,
+      // size,
       photos,
       price,
       categoryId,
@@ -124,9 +127,9 @@ export const update: RequestHandler = async (request, response) => {
     });
     const updateProductSchema = z.object({
       name: z.string(),
-      qtd: z.number(),
       description: z.string(),
-      size: z.string(),
+      // qtd: z.number(),
+      // size: z.string(),
       price: z.number(),
       photos: z.array(z.string()),
       categoryId: z.string(),
@@ -161,10 +164,10 @@ export const update: RequestHandler = async (request, response) => {
 
     const product = await ProductRepository.update(id, {
       name,
-      qtd,
       price,
       description,
-      size,
+      qtd: 0,
+      // size,
       photos,
       categoryId,
       minStock,
@@ -174,14 +177,14 @@ export const update: RequestHandler = async (request, response) => {
     if (stockExists) {
       await StockRepository.update(stockExists.id, {
         capacity,
-        qtd,
+        qtd: 0,
         minStock,
       });
     } else {
       await StockRepository.create({
         productId: product.id,
         capacity,
-        qtd,
+        qtd: 0,
         minStock,
       });
     }

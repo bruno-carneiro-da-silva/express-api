@@ -4,7 +4,7 @@ export interface IProduct {
   description: string;
   minStock?: number;
   photos: string[];
-  size: string;
+  // size: string;
   qtd: number;
   price: number;
   categoryId: string;

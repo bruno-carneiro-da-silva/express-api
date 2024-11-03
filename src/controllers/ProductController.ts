@@ -46,7 +46,7 @@ export const store: RequestHandler = async (request, response) => {
       name,
       description,
       // size,
-      // qtd,
+      qtd,
       price,
       categoryId,
       photos,
@@ -58,7 +58,7 @@ export const store: RequestHandler = async (request, response) => {
       name: z.string(),
       description: z.string(),
       // size: z.string(),
-      // qtd: z.number(),
+      qtd: z.number(),
       price: z.number(),
       categoryId: z.string(),
       photos: z.array(z.string()),
@@ -89,7 +89,7 @@ export const store: RequestHandler = async (request, response) => {
       name,
       description,
       // size,
-      qtd: 0,
+      qtd,
       price,
       categoryId,
       photos,
@@ -98,7 +98,7 @@ export const store: RequestHandler = async (request, response) => {
     await StockRepository.create({
       productId: product.id,
       capacity,
-      qtd: 0,
+      qtd,
       minStock,
     });
 
@@ -113,7 +113,7 @@ export const update: RequestHandler = async (request, response) => {
     const {
       name,
       description,
-      // qtd,
+      qtd,
       // size,
       photos,
       price,
@@ -128,7 +128,7 @@ export const update: RequestHandler = async (request, response) => {
     const updateProductSchema = z.object({
       name: z.string(),
       description: z.string(),
-      // qtd: z.number(),
+      qtd: z.number(),
       // size: z.string(),
       price: z.number(),
       photos: z.array(z.string()),
@@ -166,7 +166,7 @@ export const update: RequestHandler = async (request, response) => {
       name,
       price,
       description,
-      qtd: 0,
+      qtd,
       // size,
       photos,
       categoryId,
@@ -177,14 +177,14 @@ export const update: RequestHandler = async (request, response) => {
     if (stockExists) {
       await StockRepository.update(stockExists.id, {
         capacity,
-        qtd: 0,
+        qtd,
         minStock,
       });
     } else {
       await StockRepository.create({
         productId: product.id,
         capacity,
-        qtd: 0,
+        qtd,
         minStock,
       });
     }

@@ -5,9 +5,12 @@ import RoleRepository from "../repositories/RoleRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy } = request.query;
-    const employees = await EmployeeRepository.findAll(orderBy as string);
-    response.json(employees);
+    const { orderBy, page = "1", filter = '' } = request.query;
+    const per_page = 4
+
+    const { employees, total } = await EmployeeRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+
+    response.json({ employees, total, per_page });
   } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }

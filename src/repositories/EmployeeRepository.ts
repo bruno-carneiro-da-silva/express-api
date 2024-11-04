@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { IEmployee } from "../types/Employee";
 import bcrypt from "bcrypt";
 import { employeeSelect } from "../utils/selectors";
@@ -6,15 +6,34 @@ import { employeeSelect } from "../utils/selectors";
 const prisma = new PrismaClient();
 
 class EmployeeRepository {
-  async findAll(orderBy = "ASC") {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
+
+    const skip = (page - 1) * limit;
+    const where: Prisma.EmployeeWhereInput | undefined = filter
+      ? {
+        OR: [
+          { name: { contains: filter, mode: 'insensitive' } },
+          { email: { contains: filter, mode: 'insensitive' } },
+          { phone: { contains: filter, mode: 'insensitive' } },
+          { address: { contains: filter, mode: 'insensitive' } },
+        ],
+      } as const
+      : undefined
+
     const employees = await prisma.employee.findMany({
+      where,
       orderBy: {
         name: direction,
       },
       select: employeeSelect,
+      skip,
+      take: limit,
     });
-    return employees;
+
+    const total = await prisma.employee.count({ where })
+
+    return { employees, total };
   }
 
   async findById(id: string) {

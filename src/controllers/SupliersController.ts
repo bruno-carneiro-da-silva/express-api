@@ -160,10 +160,8 @@ export const store: RequestHandler = async (request, response) => {
     });
 
     return response.status(201).json(supplier);
-  } catch {
-    response
-      .status(500)
-      .json({ error: "Erro ao criar o fornecedor, tente mais tarde" });
+  } catch (error) {
+    response.status(500).json({ error: error });
   }
 };
 

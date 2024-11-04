@@ -1,39 +1,110 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { ISale } from "../types/Sale";
 import { saleCompanySelect, employeeSelect } from "../utils/selectors";
 
 const prisma = new PrismaClient();
 
 class SalesRepository {
-  async findAll(orderBy: string) {
-    return prisma.sale.findMany({
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+    const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SaleWhereInput | undefined = filter
+      ? {
+          OR: [
+            { employee: { name: { contains: filter, mode: "insensitive" } } },
+            {
+              company: {
+                emailAdmin: { contains: filter, mode: "insensitive" },
+              },
+            },
+            {
+              soldItems: {
+                some: {
+                  product: { name: { contains: filter, mode: "insensitive" } },
+                },
+              },
+            },
+          ],
+        }
+      : undefined;
+
+    const sales = await prisma.sale.findMany({
+      where,
       orderBy: {
-        createdAt: orderBy === "desc" ? "desc" : "asc",
+        createdAt: direction,
       },
+      skip,
+      take: limit,
       select: {
-        soldItems: true,
+        soldItems: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                photos: true,
+                description: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         employee: {
           select: employeeSelect,
         },
         totalPrice: true,
         discount: true,
         companyId: true,
+        paymentStatus: true,
         id: true,
       },
     });
+
+    const total = await prisma.sale.count({ where });
+
+    return { sales, total };
+  }
+
+  async findTotalSales() {
+    const totalSales = await prisma.sale.aggregate({
+      _sum: {
+        totalPrice: true,
+      },
+    });
+
+    return totalSales._sum.totalPrice || 0;
   }
 
   async findById(id: string) {
     return prisma.sale.findUnique({
       where: { id },
       include: {
-        employee: {
-          select: employeeSelect,
-        },
         company: {
           select: saleCompanySelect,
         },
-        soldItems: true,
+        soldItems: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                photos: true,
+                description: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        employee: {
+          select: employeeSelect,
+        },
       },
     });
   }
@@ -42,6 +113,7 @@ class SalesRepository {
     employeeId,
     companyId,
     totalPrice,
+    paymentStatus,
     discount,
     soldItems,
   }: ISale) {
@@ -62,6 +134,7 @@ class SalesRepository {
         employeeId,
         companyId,
         totalPrice,
+        paymentStatus,
         discount,
         soldItems: {
           create: soldItems.map((item) => ({
@@ -78,7 +151,22 @@ class SalesRepository {
         company: {
           select: saleCompanySelect,
         },
-        soldItems: true,
+        soldItems: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                photos: true,
+                description: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -101,8 +189,18 @@ class SalesRepository {
 
   async update(
     id: string,
-    { employeeId, companyId, totalPrice, discount, soldItems }: ISale
+    {
+      employeeId,
+      companyId,
+      totalPrice,
+      paymentStatus,
+      discount,
+      soldItems,
+    }: ISale
   ) {
+    await prisma.soldItem.deleteMany({
+      where: { saleId: id },
+    });
     for (const item of soldItems) {
       const stock = await prisma.stock.findUnique({
         where: { productId: item.productId },
@@ -121,6 +219,7 @@ class SalesRepository {
         employeeId,
         companyId,
         totalPrice,
+        paymentStatus,
         discount,
         soldItems: {
           create: soldItems.map((item) => ({
@@ -137,7 +236,21 @@ class SalesRepository {
         company: {
           select: saleCompanySelect,
         },
-        soldItems: true,
+        soldItems: {
+          include: {
+            product: {
+              select: {
+                name: true,
+                description: true,
+                category: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 

@@ -5,9 +5,23 @@ import EmployeeRepository from "../repositories/EmployeeRepository";
 import CompaniesRepository from "../repositories/CompanyRepository";
 
 export const index: RequestHandler = async (request, response) => {
-  const { orderBy } = request.query;
-  const sales = await SalesRepository.findAll(orderBy as string);
-  return response.json(sales);
+  try {
+    const { orderBy, page = "1", filter = "" } = request.query;
+    const per_page = 5;
+
+    const { sales, total } = await SalesRepository.findAll(
+      orderBy as string,
+      Number(page),
+      per_page,
+      filter as string
+    );
+
+    const totalSales = await SalesRepository.findTotalSales();
+
+    response.json({ sales, total, per_page, totalSales });
+  } catch {
+    response.status(500).json({ error: "Erro ao buscar contatos" });
+  }
 };
 
 export const show: RequestHandler = async (request, response) => {
@@ -39,6 +53,7 @@ export const store: RequestHandler = async (request, response) => {
       companyId: z.string(),
       discount: z.number(),
       totalPrice: z.number(),
+      paymentStatus: z.enum(["PAID", "PENDING", "REFUSED", "CANCELED"]),
       soldItems: z.array(
         z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
       ),
@@ -52,8 +67,14 @@ export const store: RequestHandler = async (request, response) => {
       });
     }
 
-    const { employeeId, companyId, totalPrice, discount, soldItems } =
-      body.data;
+    const {
+      employeeId,
+      companyId,
+      totalPrice,
+      paymentStatus,
+      discount,
+      soldItems,
+    } = body.data;
 
     const employeeExists = await EmployeeRepository.findById(employeeId);
     const companyExists = await CompaniesRepository.findById(companyId);
@@ -69,6 +90,7 @@ export const store: RequestHandler = async (request, response) => {
       employeeId,
       companyId,
       totalPrice,
+      paymentStatus,
       discount,
       soldItems,
     });
@@ -80,14 +102,21 @@ export const store: RequestHandler = async (request, response) => {
 
 export const update: RequestHandler = async (request, response) => {
   try {
-    const { employeeId, companyId, totalPrice, discount, soldItems } =
-      request.body;
+    const {
+      employeeId,
+      companyId,
+      totalPrice,
+      paymentStatus,
+      discount,
+      soldItems,
+    } = request.body;
     const { id } = request.params;
     const updateIdSchema = z.string();
     const updateSaleSchema = z.object({
       employeeId: z.string(),
       companyId: z.string(),
       totalPrice: z.number(),
+      paymentStatus: z.enum(["PAID", "PENDING", "REFUSED", "CANCELED"]),
       discount: z.number(),
       soldItems: z.array(
         z.object({ productId: z.string(), qtd: z.number(), price: z.number() })
@@ -101,7 +130,7 @@ export const update: RequestHandler = async (request, response) => {
     }
     if (!body.success) {
       return response.status(400).json({
-        error: "Todos os campos são obrigatórios e soldItems deve ser um array",
+        error: "Todos os campos são obrigatórios",
       });
     }
     const saleExists = await SalesRepository.findById(id);
@@ -124,6 +153,7 @@ export const update: RequestHandler = async (request, response) => {
       employeeId,
       companyId,
       totalPrice,
+      paymentStatus,
       discount,
       soldItems,
     });

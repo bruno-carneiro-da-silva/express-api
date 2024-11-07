@@ -8,15 +8,15 @@ class ContactsRepository {
     const skip = (page - 1) * limit;
 
     const where: Prisma.ContactWhereInput | undefined = filter
-      ? {
-        OR: [
-          { name: { contains: filter, mode: 'insensitive' } },
-          { email: { contains: filter, mode: 'insensitive' } },
-          { phone: { contains: filter, mode: 'insensitive' } },
-          { address: { contains: filter, mode: 'insensitive' } },
-        ],
-      } as const
-      : undefined
+      ? ({
+          OR: [
+            { name: { contains: filter, mode: "insensitive" } },
+            { email: { contains: filter, mode: "insensitive" } },
+            { phone: { contains: filter, mode: "insensitive" } },
+            { address: { contains: filter, mode: "insensitive" } },
+          ],
+        } as const)
+      : undefined;
 
     const contacts = await prisma.contact.findMany({
       where,
@@ -27,7 +27,7 @@ class ContactsRepository {
       take: limit,
     });
 
-    const total = await prisma.contact.count({ where })
+    const total = await prisma.contact.count({ where });
 
     return { contacts, total };
   }
@@ -46,7 +46,18 @@ class ContactsRepository {
     return contact;
   }
 
-  async create({ name, email, phone, address, zip, birthday, latitude, longitude, companyId }: IContact) {
+  async create({
+    name,
+    email,
+    phone,
+    address,
+    zip,
+    status,
+    birthday,
+    latitude,
+    longitude,
+    companyId,
+  }: IContact) {
     const contact = await prisma.contact.create({
       data: {
         name,
@@ -54,6 +65,7 @@ class ContactsRepository {
         phone,
         address,
         zip,
+        status,
         birthday,
         latitude,
         longitude,
@@ -65,7 +77,17 @@ class ContactsRepository {
 
   async update(
     id: string,
-    { name, email, phone, address, zip, birthday, latitude, longitude, companyId }: IContact
+    {
+      name,
+      email,
+      phone,
+      address,
+      zip,
+      birthday,
+      latitude,
+      longitude,
+      companyId,
+    }: IContact
   ) {
     if (companyId) {
       const companyExists = await prisma.company.findUnique({

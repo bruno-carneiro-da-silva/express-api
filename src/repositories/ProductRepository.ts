@@ -89,9 +89,7 @@ class ProductRepository {
     });
 
     if (stock && stock.qtd <= stock.minStock) {
-      // Lógica para notificar o usuário
-      console.log(`Produto ${productId} está no estoque mínimo.`);
-      // Aqui você pode enviar um email, uma notificação, etc.
+      throw new Error(`Produto ${productId} está no estoque mínimo.`);
     }
   }
 

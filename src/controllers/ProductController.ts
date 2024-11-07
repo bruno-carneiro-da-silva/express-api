@@ -6,13 +6,18 @@ import CategoriesRepository from "../repositories/CategoriesRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
-    const { orderBy, page = "1", filter = '' } = request.query;
-    const per_page = 4
+    const { orderBy, page = "1", filter = "" } = request.query;
+    const per_page = 4;
 
-    const { products, total } = await ProductRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+    const { products, total } = await ProductRepository.findAll(
+      orderBy as string,
+      Number(page),
+      per_page,
+      filter as string
+    );
 
     return response.json({ products, total, per_page });
-  } catch (error) {
+  } catch {
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };

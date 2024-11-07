@@ -1,6 +1,7 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import { ISale } from "../types/Sale";
 import { saleCompanySelect, employeeSelect } from "../utils/selectors";
+import { InsufficientStockError } from "../error/InsufficientStockError";
 
 const prisma = new PrismaClient();
 
@@ -123,9 +124,7 @@ class SalesRepository {
       });
 
       if (!stock || stock.qtd < item.qtd) {
-        throw new Error(
-          `Quantidade insuficiente no estoque para o produto ${item.productId}`
-        );
+        throw new InsufficientStockError(item.productId);
       }
     }
 
@@ -207,9 +206,7 @@ class SalesRepository {
       });
 
       if (!stock || stock.qtd < item.qtd) {
-        throw new Error(
-          `Quantidade insuficiente no estoque para o produto ${item.productId}`
-        );
+        throw new InsufficientStockError(item.productId);
       }
     }
 

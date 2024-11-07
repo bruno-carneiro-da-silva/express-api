@@ -3,6 +3,7 @@ import SalesRepository from "../repositories/SalesRepository";
 import { z } from "zod";
 import EmployeeRepository from "../repositories/EmployeeRepository";
 import CompaniesRepository from "../repositories/CompanyRepository";
+import { InsufficientStockError } from "../error/InsufficientStockError";
 
 export const index: RequestHandler = async (request, response) => {
   try {
@@ -95,7 +96,10 @@ export const store: RequestHandler = async (request, response) => {
       soldItems,
     });
     response.status(201).json(sale);
-  } catch {
+  } catch (error) {
+    if (error instanceof InsufficientStockError) {
+      return response.status(400).json({ error: error.message });
+    }
     response.status(500).json({ error: "Erro ao criar a venda" });
   }
 };
@@ -158,8 +162,11 @@ export const update: RequestHandler = async (request, response) => {
       soldItems,
     });
     response.status(201).json(sale);
-  } catch {
-    response.status(500).json({ error: "Erro ao atualizar a venda" });
+  } catch (error) {
+    if (error instanceof InsufficientStockError) {
+      return response.status(400).json({ error: error.message });
+    }
+    response.status(500).json({ error: "Erro ao criar a venda" });
   }
 };
 

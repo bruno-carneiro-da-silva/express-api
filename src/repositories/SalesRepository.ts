@@ -1,4 +1,4 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma, Sale } from "@prisma/client";
 import { ISale } from "../types/Sale";
 import { saleCompanySelect, employeeSelect } from "../utils/selectors";
 import { InsufficientStockError } from "../error/InsufficientStockError";
@@ -12,22 +12,22 @@ class SalesRepository {
 
     const where: Prisma.SaleWhereInput | undefined = filter
       ? {
-          OR: [
-            { employee: { name: { contains: filter, mode: "insensitive" } } },
-            {
-              company: {
-                emailAdmin: { contains: filter, mode: "insensitive" },
+        OR: [
+          { employee: { name: { contains: filter, mode: "insensitive" } } },
+          {
+            company: {
+              emailAdmin: { contains: filter, mode: "insensitive" },
+            },
+          },
+          {
+            soldItems: {
+              some: {
+                product: { name: { contains: filter, mode: "insensitive" } },
               },
             },
-            {
-              soldItems: {
-                some: {
-                  product: { name: { contains: filter, mode: "insensitive" } },
-                },
-              },
-            },
-          ],
-        }
+          },
+        ],
+      }
       : undefined;
 
     const sales = await prisma.sale.findMany({
@@ -110,6 +110,61 @@ class SalesRepository {
     });
   }
 
+  async handleStock(prisma: Prisma.TransactionClient, soldItems: ISale['soldItems'], paymentStatus: ISale['paymentStatus'], oldSale?: Sale) {
+    const updateStock = async ({ items, adding }: { items: ISale['soldItems'], adding: boolean }) => {
+      for (const item of items) {
+        const stock = await prisma.stock.findUnique({
+          where: { productId: item.productId },
+        });
+
+        if (stock) {
+          const qtd = adding ? stock.qtd + item.qtd : stock.qtd - item.qtd
+          console.log('updating new qtd', qtd)
+          await prisma.stock.update({
+            where: { productId: item.productId },
+            data: {
+              qtd,
+            },
+          });
+        }
+      }
+    }
+
+    if (oldSale) {
+      const oldSoldItems = await prisma.soldItem.findMany({
+        where: { saleId: oldSale.id },
+      });
+      if (oldSoldItems) {
+        // devolver estoque dos antigos produtos
+        await updateStock({ items: oldSoldItems, adding: true })
+      }
+      await prisma.soldItem.deleteMany({
+        where: { saleId: oldSale.id }
+      })
+
+      if (paymentStatus !== 'CANCELED') {
+        // caso a venda não foi cancelada atualizar o estoque
+        await updateStock({ items: soldItems, adding: false })
+      }
+    } else {
+      // criando venda pela primeira vez: reduzir estoque dos produtos vendidos
+      // checar se há estoque disponível
+      for (const item of soldItems) {
+        const stock = await prisma.stock.findUnique({
+          where: { productId: item.productId },
+        });
+
+        if (!stock || stock.qtd < item.qtd) {
+          throw new InsufficientStockError(
+            `Quantidade insuficiente no estoque para o produto ${item.productId}`
+          );
+        }
+      }
+      // atualizar o estoque dos produtos vendidos
+      await updateStock({ items: soldItems, adding: false })
+    }
+  }
+
   async create({
     employeeId,
     companyId,
@@ -118,72 +173,54 @@ class SalesRepository {
     discount,
     soldItems,
   }: ISale) {
-    for (const item of soldItems) {
-      const stock = await prisma.stock.findUnique({
-        where: { productId: item.productId },
-      });
+    const result = await prisma.$transaction(async (prisma) => {
+      await this.handleStock(prisma, soldItems, paymentStatus)
 
-      if (!stock || stock.qtd < item.qtd) {
-        throw new InsufficientStockError(item.productId);
-      }
-    }
-
-    const sale = await prisma.sale.create({
-      data: {
-        employeeId,
-        companyId,
-        totalPrice,
-        paymentStatus,
-        discount,
-        soldItems: {
-          create: soldItems.map((item) => ({
-            productId: item.productId,
-            qtd: item.qtd,
-            price: item.price,
-          })),
+      const sale = await prisma.sale.create({
+        data: {
+          employeeId,
+          companyId,
+          totalPrice,
+          paymentStatus,
+          discount,
+          soldItems: {
+            create: soldItems.map((item) => ({
+              productId: item.productId,
+              qtd: item.qtd,
+              price: item.price,
+            })),
+          },
         },
-      },
-      include: {
-        employee: {
-          select: employeeSelect,
-        },
-        company: {
-          select: saleCompanySelect,
-        },
-        soldItems: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                photos: true,
-                description: true,
-                category: {
-                  select: {
-                    name: true,
+        include: {
+          employee: {
+            select: employeeSelect,
+          },
+          company: {
+            select: saleCompanySelect,
+          },
+          soldItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  photos: true,
+                  description: true,
+                  category: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
-
-    for (const item of soldItems) {
-      const stock = await prisma.stock.findUnique({
-        where: { productId: item.productId },
       });
 
-      if (stock) {
-        await prisma.stock.update({
-          where: { productId: item.productId },
-          data: {
-            qtd: stock.qtd - item.qtd,
-          },
-        });
-      }
-    }
-    return sale;
+      return sale;
+    })
+
+    return result
   }
 
   async update(
@@ -197,78 +234,62 @@ class SalesRepository {
       soldItems,
     }: ISale
   ) {
-    await prisma.soldItem.deleteMany({
-      where: { saleId: id },
-    });
-    for (const item of soldItems) {
-      const stock = await prisma.stock.findUnique({
-        where: { productId: item.productId },
-      });
+    const result = await prisma.$transaction(async (prisma) => {
+      const oldSale = await prisma.sale.findUnique({ where: { id } });
 
-      if (!stock || stock.qtd < item.qtd) {
-        throw new InsufficientStockError(item.productId);
+      if (!oldSale) {
+        throw new Error('Venda não encontrada!');
       }
-    }
 
-    const sale = await prisma.sale.update({
-      where: { id },
-      data: {
-        employeeId,
-        companyId,
-        totalPrice,
-        paymentStatus,
-        discount,
-        soldItems: {
-          create: soldItems.map((item) => ({
-            productId: item.productId,
-            qtd: item.qtd,
-            price: item.price,
-          })),
+      await this.handleStock(prisma, soldItems, paymentStatus, oldSale);
+
+      const sale = await prisma.sale.update({
+        where: { id },
+        data: {
+          employeeId,
+          companyId,
+          totalPrice,
+          paymentStatus,
+          discount,
+          soldItems: {
+            create: soldItems.map((item) => ({
+              productId: item.productId,
+              qtd: item.qtd,
+              price: item.price,
+            })),
+          },
         },
-      },
-      include: {
-        employee: {
-          select: employeeSelect,
-        },
-        company: {
-          select: saleCompanySelect,
-        },
-        soldItems: {
-          include: {
-            product: {
-              select: {
-                name: true,
-                description: true,
-                category: {
-                  select: {
-                    name: true,
+        include: {
+          employee: {
+            select: employeeSelect,
+          },
+          company: {
+            select: saleCompanySelect,
+          },
+          soldItems: {
+            include: {
+              product: {
+                select: {
+                  name: true,
+                  description: true,
+                  category: {
+                    select: {
+                      name: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
-
-    // Atualizar o estoque dos produtos vendidos
-    for (const item of soldItems) {
-      const stock = await prisma.stock.findUnique({
-        where: { productId: item.productId },
       });
 
-      if (stock) {
-        await prisma.stock.update({
-          where: { productId: item.productId },
-          data: {
-            qtd: stock.qtd - item.qtd,
-          },
-        });
-      }
-    }
+      return sale;
+    });
 
-    return sale;
+    return result;
   }
+
 
   async delete(id: string) {
     return prisma.sale.delete({

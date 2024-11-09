@@ -153,7 +153,7 @@ class ProductRepository {
       },
     });
 
-    await this.checkStockAndNotify(id);
+    // await this.checkStockAndNotify(id);
 
     return product;
   }

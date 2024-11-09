@@ -195,7 +195,8 @@ export const update: RequestHandler = async (request, response) => {
     }
 
     response.json(product);
-  } catch {
+  } catch (error) {
+    console.log(error)
     response.status(500).json({ error: "Erro interno, tente mais tarde" });
   }
 };

@@ -1,9 +1,20 @@
 import { RequestHandler } from "express";
 import CompaniesRepository from "../repositories/CompanyRepository";
 import { z } from "zod";
+import SalesRepository from "../repositories/SalesRepository";
 
 export const index: RequestHandler = async (request, response) => {
   try {
+    const { orderBy, page = "1", filter = "" } = request.query;
+    const per_page = 5;
+
+    const { sales, total } = await SalesRepository.findAll(
+      orderBy as string,
+      Number(page),
+      per_page,
+      filter as string
+    );
+
     const authHeader = request.headers.authorization;
     if (!authHeader) {
       return response.status(401).json({ error: "Token não fornecido" });
@@ -16,9 +27,11 @@ export const index: RequestHandler = async (request, response) => {
       return response.status(404).json({ error: "Empresa não encontrada" });
     }
 
-    const { refreshToken, ...companyWithoutRefreshToken } = company;
+    const totalSales = await SalesRepository.findTotalSales();
 
-    return response.json(companyWithoutRefreshToken);
+    const { refreshToken, ...companyData } = company;
+
+    return response.json({ companyData, sales, total, per_page, totalSales });
   } catch {
     response.status(500).json({ error: "Erro ao buscar empresa" });
   }

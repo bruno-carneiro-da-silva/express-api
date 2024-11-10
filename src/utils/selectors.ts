@@ -59,7 +59,6 @@ export type CompanySelect = {
     select: {
       contacts: boolean;
       suppliers: boolean;
-      sales: boolean;
     };
   };
 };
@@ -130,7 +129,7 @@ export const companySelect: CompanySelect = {
   verificationCodeExpiresAt: false,
   photo_base64: true,
   _count: {
-    select: { contacts: true, suppliers: true, sales: true },
+    select: { contacts: true, suppliers: true },
   },
 };
 

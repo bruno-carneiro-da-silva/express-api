@@ -8,15 +8,15 @@ class SupplierRepository {
     const skip = (page - 1) * limit;
 
     const where: Prisma.SupplierWhereInput | undefined = filter
-      ? {
-        OR: [
-          { name: { contains: filter, mode: 'insensitive' } },
-          { email: { contains: filter, mode: 'insensitive' } },
-          { phone: { contains: filter, mode: 'insensitive' } },
-          { address: { contains: filter, mode: 'insensitive' } },
-        ],
-      } as const
-      : undefined
+      ? ({
+          OR: [
+            { name: { contains: filter, mode: "insensitive" } },
+            { email: { contains: filter, mode: "insensitive" } },
+            { phone: { contains: filter, mode: "insensitive" } },
+            { address: { contains: filter, mode: "insensitive" } },
+          ],
+        } as const)
+      : undefined;
 
     const suppliers = await prisma.supplier.findMany({
       where,
@@ -39,7 +39,7 @@ class SupplierRepository {
       },
     });
 
-    const total = await prisma.supplier.count({ where })
+    const total = await prisma.supplier.count({ where });
 
     return { suppliers, total };
   }
@@ -75,7 +75,6 @@ class SupplierRepository {
     corporateReason,
     email,
     lastName,
-    dateOfBirth,
     nationality,
     niche,
     userId,
@@ -93,7 +92,6 @@ class SupplierRepository {
         corporateReason,
         email,
         lastName,
-        dateOfBirth,
         nationality,
         niche,
         company: {
@@ -134,7 +132,6 @@ class SupplierRepository {
       corporateReason,
       email,
       lastName,
-      dateOfBirth,
       nationality,
       niche,
       userId,
@@ -154,7 +151,6 @@ class SupplierRepository {
         corporateReason,
         email,
         lastName,
-        dateOfBirth,
         nationality,
         niche,
         company: {

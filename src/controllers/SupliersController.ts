@@ -94,10 +94,6 @@ export const store: RequestHandler = async (request, response) => {
       email: z.string().email(),
       phone: z.string(),
       lastName: z.string(),
-      dateOfBirth: z.preprocess((arg) => {
-        if (typeof arg === "string" || arg instanceof Date)
-          return new Date(arg);
-      }, z.date()),
       nationality: z.string(),
       niche: z.string(),
       city: z.string(),
@@ -149,7 +145,6 @@ export const store: RequestHandler = async (request, response) => {
       email,
       phone,
       lastName,
-      dateOfBirth: body.data.dateOfBirth,
       nationality,
       niche,
       city,

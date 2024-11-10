@@ -13,7 +13,7 @@ export interface ISupplier {
   corporateReason: string;
   email: string;
   lastName: string;
-  dateOfBirth: Date;
+  dateOfBirth?: Date;
   nationality: string;
   niche: string;
 }

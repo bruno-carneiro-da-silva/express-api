@@ -3,8 +3,8 @@ import bcrypt from "bcrypt";
 import CompaniesRepository from "../repositories/CompanyRepository";
 import "dotenv/config";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret";
-const REFRESH_TOKEN_SECRET =
+export const JWT_SECRET = process.env.JWT_SECRET || "your-jwt-secret";
+export const REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET || "your-refresh-token-secret";
 
 export const validadeCredentials = async (

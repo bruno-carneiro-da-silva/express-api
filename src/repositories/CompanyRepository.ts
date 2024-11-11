@@ -19,14 +19,10 @@ class CompaniesRepository {
   }
 
   async findById(id: string) {
-    console.log(`Procurando empresa com id: ${id}`); // Log para depuração
-
     const company = await prisma.company.findUnique({
       where: { id },
       select: companySelect,
     });
-
-    console.log(`Empresa encontrada: ${company}`); // Log para depuração
     return company;
   }
 
@@ -165,11 +161,10 @@ class CompaniesRepository {
     phoneNumberAdmin: string,
     newPassword: string
   ) {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const company = await prisma.company.update({
       where: { phoneNumberAdmin: phoneNumberAdmin },
       data: {
-        password: hashedPassword,
+        password: newPassword,
         verificationCode: null,
         verificationCodeExpiresAt: null,
       },

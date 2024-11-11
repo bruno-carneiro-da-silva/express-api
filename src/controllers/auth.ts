@@ -88,7 +88,6 @@ export const sendVerificationCode: RequestHandler = async (req, res) => {
 
 export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
   try {
-    const { phoneNumberAdmin, code, newPassword } = req.body;
     const schema = z.object({
       phoneNumberAdmin: z.string().regex(/^\+?[1-9]\d{1,14}$/, {
         message: "Número de telefone inválido",
@@ -100,10 +99,12 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
     if (!body.success)
       return res.status(500).json({ error: "Dados inválidos" });
 
-    const user = await CompaniesRepository.findByPhoneNumber(phoneNumberAdmin);
+    const user = await CompaniesRepository.findByPhoneNumber(
+      body.data.phoneNumberAdmin
+    );
     if (
       !user ||
-      user.verificationCode !== code ||
+      user.verificationCode !== body.data.code ||
       !user.verificationCodeExpiresAt ||
       new Date() > user.verificationCodeExpiresAt
     ) {
@@ -112,7 +113,7 @@ export const verifyCodeAndResetPassword: RequestHandler = async (req, res) => {
         .json({ error: "Código de verificação inválido ou expirado" });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(body.data.newPassword, 10);
     await CompaniesRepository.updatePasswordByPhoneNumber(
       body.data.phoneNumberAdmin,
       hashedPassword

@@ -14,6 +14,6 @@ export interface ISupplier {
   email: string;
   lastName: string;
   dateOfBirth?: Date;
-  nationality: string;
+  nationality?: string;
   niche: string;
 }

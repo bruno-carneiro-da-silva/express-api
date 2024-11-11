@@ -136,7 +136,7 @@ model Supplier {
   lastName        String
   address         String
   dateOfBirth     DateTime?
-  nationality     String
+  nationality     String?
   niche           String
   photo_base64    String?  @db.Text
   city            String

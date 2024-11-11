@@ -75,7 +75,6 @@ class SupplierRepository {
     corporateReason,
     email,
     lastName,
-    nationality,
     niche,
     userId,
   }: ISupplier & { userId: string }) {
@@ -92,7 +91,6 @@ class SupplierRepository {
         corporateReason,
         email,
         lastName,
-        nationality,
         niche,
         company: {
           connect: {

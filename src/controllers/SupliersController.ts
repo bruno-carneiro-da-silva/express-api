@@ -96,14 +96,6 @@ export const store: RequestHandler = async (request, response) => {
       niche: z.string(),
       city: z.string(),
       photo: z.string(),
-      startContractDate: z.preprocess((arg) => {
-        if (typeof arg === "string" || arg instanceof Date)
-          return new Date(arg);
-      }, z.date()),
-      endContractDate: z.preprocess((arg) => {
-        if (typeof arg === "string" || arg instanceof Date)
-          return new Date(arg);
-      }, z.date()),
     });
 
     const body = supplierSchema.safeParse(request.body);
@@ -146,8 +138,6 @@ export const store: RequestHandler = async (request, response) => {
       niche,
       city,
       photo,
-      startContractDate: body.data.startContractDate,
-      endContractDate: body.data.endContractDate,
       userId: decoded.userId,
     });
 

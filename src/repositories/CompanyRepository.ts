@@ -19,10 +19,14 @@ class CompaniesRepository {
   }
 
   async findById(id: string) {
+    console.log(`Procurando empresa com id: ${id}`); // Log para depuração
+
     const company = await prisma.company.findUnique({
       where: { id },
       select: companySelect,
     });
+
+    console.log(`Empresa encontrada: ${company}`); // Log para depuração
     return company;
   }
 

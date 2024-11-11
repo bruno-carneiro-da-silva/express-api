@@ -33,13 +33,13 @@ export const show: RequestHandler = async (request, response) => {
     const body = saleShowSchema.safeParse(id);
 
     if (!body.success) {
-      return response.status(400).json({ error: "ID inválido" });
+      return response.status(500).json({ error: "ID inválido" });
     }
 
     const sale = await SalesRepository.findById(id);
 
     if (!sale) {
-      return response.status(404).json({ error: "Pedido não encontrado" });
+      return response.status(500).json({ error: "Pedido não encontrado" });
     }
     response.json(sale);
   } catch {
@@ -49,6 +49,15 @@ export const show: RequestHandler = async (request, response) => {
 
 export const store: RequestHandler = async (request, response) => {
   try {
+    // const {
+    //   employeeId,
+    //   companyId,
+    //   totalPrice,
+    //   paymentStatus,
+    //   discount,
+    //   soldItems,
+    // } = request.body;
+
     const addSaleSchema = z.object({
       employeeId: z.string(),
       companyId: z.string(),
@@ -76,9 +85,14 @@ export const store: RequestHandler = async (request, response) => {
       discount,
       soldItems,
     } = body.data;
-
+    console.log(`Verificando funcionário com id: ${employeeId}`); // Log para depuração
     const employeeExists = await EmployeeRepository.findById(employeeId);
+    console.log(`Resultado da verificação do funcionário: ${employeeExists}`); // Log para depuração
+
+    console.log(`Verificando empresa com id: ${companyId}`); // Log para depuração
     const companyExists = await CompaniesRepository.findById(companyId);
+    console.log(`Resultado da verificação da empresa: ${companyExists}`); // Log para depuração
+
     if (!employeeExists) {
       return response.status(404).json({ error: "Funcionário não encontrado" });
     }

@@ -7,8 +7,8 @@ export interface ISupplier {
   cnpj: string;
   city: string;
   photo: string;
-  startContractDate: Date;
-  endContractDate: Date;
+  startContractDate?: Date;
+  endContractDate?: Date;
   phone: string;
   corporateReason: string;
   email: string;

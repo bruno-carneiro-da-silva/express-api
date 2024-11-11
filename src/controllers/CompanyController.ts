@@ -122,8 +122,10 @@ export const store: RequestHandler = async (request, response) => {
     });
 
     response.json(company);
-  } catch (error) {
-    response.status(500).json({ error: error });
+  } catch {
+    response
+      .status(500)
+      .json({ error: "Erro ao criar usuário verifique as permissões" });
   }
 };
 

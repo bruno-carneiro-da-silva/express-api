@@ -30,7 +30,7 @@ export const generateRefreshToken = (
   phoneNumberAdmin: string
 ) => {
   const payload = { userId, phoneNumberAdmin };
-  const options = { expiresIn: "7d" }; 
+  const options = { expiresIn: "7d" };
   return jwt.sign(payload, REFRESH_TOKEN_SECRET, options);
 };
 

@@ -11,15 +11,15 @@ class EmployeeRepository {
 
     const skip = (page - 1) * limit;
     const where: Prisma.EmployeeWhereInput | undefined = filter
-      ? {
-        OR: [
-          { name: { contains: filter, mode: 'insensitive' } },
-          { email: { contains: filter, mode: 'insensitive' } },
-          { phone: { contains: filter, mode: 'insensitive' } },
-          { address: { contains: filter, mode: 'insensitive' } },
-        ],
-      } as const
-      : undefined
+      ? ({
+          OR: [
+            { name: { contains: filter, mode: "insensitive" } },
+            { email: { contains: filter, mode: "insensitive" } },
+            { phone: { contains: filter, mode: "insensitive" } },
+            { address: { contains: filter, mode: "insensitive" } },
+          ],
+        } as const)
+      : undefined;
 
     const employees = await prisma.employee.findMany({
       where,
@@ -31,16 +31,19 @@ class EmployeeRepository {
       take: limit,
     });
 
-    const total = await prisma.employee.count({ where })
+    const total = await prisma.employee.count({ where });
 
     return { employees, total };
   }
 
   async findById(id: string) {
+    console.log(`Procurando funcionário com id: ${id}`); // Log para depuração
+
     const employee = await prisma.employee.findUnique({
-      where: { id },
+      where: { id: id },
       select: employeeSelect,
     });
+    console.log(`Funcionário encontrado: ${employee}`); // Log para depuração
     return employee;
   }
 

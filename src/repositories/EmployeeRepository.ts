@@ -37,13 +37,10 @@ class EmployeeRepository {
   }
 
   async findById(id: string) {
-    console.log(`Procurando funcionário com id: ${id}`); // Log para depuração
-
     const employee = await prisma.employee.findUnique({
       where: { id: id },
       select: employeeSelect,
     });
-    console.log(`Funcionário encontrado: ${employee}`); // Log para depuração
     return employee;
   }
 

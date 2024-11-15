@@ -15,50 +15,52 @@ enum PaymentStatus {
 }
 
 model Company {
-  id                 String   @id @unique @default(uuid())
-  firstName          String   @default("")
-  lastName           String   @default("")
-  emailAdmin         String   @unique @default("")
-  phoneNumberAdmin   String   @unique @default("")
-  password           String
-  nameCompany        String   @default("")
-  emailCompany       String   @default("")
-  phoneNumberCompany String   @default("")
-  addressCompany     String   @default("")
-  photo_base64       String?  @db.Text
-  terms              Boolean? @default(false)
-  refreshToken       String?
-  verificationCode   String?
-  verificationCodeExpiresAt   DateTime?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-  sales              Sale[]
-  planId             String?
-  plan               Plan?    @relation(fields: [planId], references: [id])
-  roleId             Int?
-  role               Role?    @relation(fields: [roleId], references: [id])
-  suppliers          Supplier[]
-  contacts           Contact[]
+  id                        String     @id @unique @default(uuid())
+  firstName                 String     @default("")
+  lastName                  String     @default("")
+  emailAdmin                String     @unique @default("")
+  phoneNumberAdmin          String     @unique @default("")
+  password                  String
+  nameCompany               String     @default("")
+  emailCompany              String     @default("")
+  phoneNumberCompany        String     @default("")
+  addressCompany            String     @default("")
+  photo_base64              String?    @db.Text
+  terms                     Boolean?   @default(false)
+  refreshToken              String?
+  verificationCode          String?
+  verificationCodeExpiresAt DateTime?
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @updatedAt
+  sales                     Sale[]
+  planId                    String?
+  plan                      Plan?      @relation(fields: [planId], references: [id])
+  roleId                    Int?
+  role                      Role?      @relation(fields: [roleId], references: [id])
+  suppliers                 Supplier[]
+  contacts                  Contact[]
+  products                  Product[]
+  employees                 Employee[]
 }
 
 model Role {
-  id          Int      @id @default(autoincrement())
-  uId         String   @unique @default(uuid())
-  name        String   @unique
-  permissions String[] @default(["*"])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
+  id          Int        @id @default(autoincrement())
+  uId         String     @unique @default(uuid())
+  name        String     @unique
+  permissions String[]   @default(["*"])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
   companies   Company[]
   employees   Employee[]
 }
 
 model Plan {
-  id          String       @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   description String?
   price       Float
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
   companies   Company[]
   features    Feature[]
   prices      Price[]
@@ -75,132 +77,136 @@ model Feature {
 }
 
 model Price {
-  id          String   @id @default(uuid())
-  name        String
-  price       Float
-  benefits    String?
-  planId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  plan        Plan     @relation(fields: [planId], references: [id])
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  benefits  String?
+  planId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  plan      Plan     @relation(fields: [planId], references: [id])
 }
 
 model Category {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
   products  Product[]
   contacts  Contact[]
 }
 
 model Contact {
-  id         String   @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
-  email      String?  @unique
+  email      String?   @unique
   phone      String
   address    String?
-  status     Boolean? @default(true)
+  status     Boolean?  @default(true)
   zip        String?
   birthday   String?
   categoryId String?
   companyId  String?
   latitude   String?
   longitude  String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now())
   category   Category? @relation(fields: [categoryId], references: [id])
   company    Company?  @relation(fields: [companyId], references: [id])
 }
 
 model Employee {
-  id        String   @id @unique @default(uuid())
-  name      String
-  email     String?  @unique
-  phone     String
-  address   String
-  roleId    String
-  userName  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  sales     Sale[]
+  id           String        @id @unique @default(uuid())
+  name         String
+  email        String?       @unique
+  phone        String
+  address      String
+  roleId       String
+  userName     String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  sales        Sale[]
   transactions Transaction[]
-  role      Role     @relation(fields: [roleId], references: [uId])
+  role         Role          @relation(fields: [roleId], references: [uId])
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id])
 }
 
 model Supplier {
-  id              String   @id @default(uuid())
-  cnpj            String   @unique
-  name            String
-  lastName        String
-  address         String
-  dateOfBirth     DateTime?
-  nationality     String?
-  niche           String
-  photo_base64    String?  @db.Text
-  city            String
+  id                String        @id @default(uuid())
+  cnpj              String        @unique
+  name              String
+  lastName          String
+  address           String
+  dateOfBirth       DateTime?
+  nationality       String?
+  niche             String
+  photo_base64      String?       @db.Text
+  city              String
   startContractDate DateTime?
-  endContractDate DateTime?
-  corporateReason String
-  email           String?  @unique
-  phone           String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  transactions    Transaction[]
-  companyId       String
-  company         Company  @relation(fields: [companyId], references: [id])
+  endContractDate   DateTime?
+  corporateReason   String
+  email             String?       @unique
+  phone             String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  transactions      Transaction[]
+  companyId         String
+  company           Company       @relation(fields: [companyId], references: [id])
 }
 
 model Product {
-  id         String   @id @unique @default(uuid())
-  name       String
-  description String
-  size       String
-  qtd        Int
-  price      Float
-  categoryId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-  category   Category @relation(fields: [categoryId], references: [id])
-  stock      Stock?
-  soldItems  SoldItem[]
+  id           String        @id @unique @default(uuid())
+  name         String
+  description  String
+  size         String
+  qtd          Int
+  price        Float
+  categoryId   String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now())
+  category     Category      @relation(fields: [categoryId], references: [id])
+  stock        Stock?
+  soldItems    SoldItem[]
   transactions Transaction[]
-  photos     Photo[]
+  photos       Photo[]
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id])
 }
 
 model Photo {
-  id         String   @id @default(uuid())
-  base64     String   @db.Text
-  productId  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-  product    Product  @relation(fields: [productId], references: [id])
+  id        String   @id @default(uuid())
+  base64    String   @db.Text
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Stock {
-  id         String   @id @default(uuid())
-  productId  String @unique
-  capacity   Int
-  qtd        Int
-  minStock   Int
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  product    Product  @relation(fields: [productId], references: [id])
+  id        String   @id @default(uuid())
+  productId String   @unique
+  capacity  Int
+  qtd       Int
+  minStock  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 model Sale {
-  id         String   @id @default(uuid())
-  employeeId String
-  companyId  String
-  totalPrice Float
-  discount   Float?
+  id            String        @id @default(uuid())
+  employeeId    String
+  companyId     String
+  totalPrice    Float
+  discount      Float?
   paymentStatus PaymentStatus @default(PENDING)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  employee   Employee @relation(fields: [employeeId], references: [id])
-  company    Company  @relation(fields: [companyId], references: [id])
-  soldItems  SoldItem[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  employee      Employee      @relation(fields: [employeeId], references: [id])
+  company       Company       @relation(fields: [companyId], references: [id])
+  soldItems     SoldItem[]
 }
 
 model SoldItem {
@@ -216,16 +222,16 @@ model SoldItem {
 }
 
 model Transaction {
-  id          String   @id @default(uuid())
-  productId   String
-  employeeId  String
+  id           String   @id @default(uuid())
+  productId    String
+  employeeId   String
   supplierCnpj String
-  qtd         Int
-  totalPrice  Float
-  selledPrice Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-  product     Product  @relation(fields: [productId], references: [id])
-  employee    Employee @relation(fields: [employeeId], references: [id])
-  supplier    Supplier @relation(fields: [supplierCnpj], references: [cnpj])
+  qtd          Int
+  totalPrice   Float
+  selledPrice  Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  product      Product  @relation(fields: [productId], references: [id])
+  employee     Employee @relation(fields: [employeeId], references: [id])
+  supplier     Supplier @relation(fields: [supplierCnpj], references: [cnpj])
 }

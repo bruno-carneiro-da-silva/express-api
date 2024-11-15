@@ -4,17 +4,28 @@ import { z } from "zod";
 import EmployeeRepository from "../repositories/EmployeeRepository";
 import CompaniesRepository from "../repositories/CompanyRepository";
 import { InsufficientStockError } from "../error/InsufficientStockError";
+import jwt from 'jsonwebtoken'
 
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy, page = "1", filter = "" } = request.query;
     const per_page = 5;
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const { sales, total } = await SalesRepository.findAll(
       orderBy as string,
       Number(page),
       per_page,
-      filter as string
+      filter as string,
+      decoded.userId
     );
 
     const totalSales = await SalesRepository.findTotalSales();
@@ -70,7 +81,6 @@ export const store: RequestHandler = async (request, response) => {
 
     const {
       employeeId,
-      companyId,
       totalPrice,
       paymentStatus,
       discount,
@@ -78,7 +88,16 @@ export const store: RequestHandler = async (request, response) => {
     } = body.data;
     const employeeExists = await EmployeeRepository.findById(employeeId);
 
-    const companyExists = await CompaniesRepository.findById(companyId);
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
+    const companyExists = await CompaniesRepository.findById(decoded.userId);
 
     if (!employeeExists) {
       return response.status(404).json({ error: "Funcionário não encontrado" });
@@ -90,7 +109,7 @@ export const store: RequestHandler = async (request, response) => {
 
     const sale = await SalesRepository.create({
       employeeId,
-      companyId,
+      companyId: decoded.userId,
       totalPrice,
       paymentStatus,
       discount,
@@ -109,7 +128,6 @@ export const update: RequestHandler = async (request, response) => {
   try {
     const {
       employeeId,
-      companyId,
       totalPrice,
       paymentStatus,
       discount,
@@ -119,7 +137,6 @@ export const update: RequestHandler = async (request, response) => {
     const updateIdSchema = z.string();
     const updateSaleSchema = z.object({
       employeeId: z.string(),
-      companyId: z.string(),
       totalPrice: z.number(),
       paymentStatus: z.enum(["PAID", "PENDING", "REFUSED", "CANCELED"]),
       discount: z.number(),
@@ -138,6 +155,16 @@ export const update: RequestHandler = async (request, response) => {
         error: "Todos os campos são obrigatórios",
       });
     }
+
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const saleExists = await SalesRepository.findById(id);
 
     if (!saleExists) {
@@ -145,7 +172,7 @@ export const update: RequestHandler = async (request, response) => {
     }
 
     const employeeExists = await EmployeeRepository.findById(employeeId);
-    const companyExists = await CompaniesRepository.findById(companyId);
+    const companyExists = await CompaniesRepository.findById(decoded.userId);
     if (!employeeExists) {
       return response.status(404).json({ error: "Funcionário não encontrado" });
     }
@@ -156,7 +183,7 @@ export const update: RequestHandler = async (request, response) => {
 
     const sale = await SalesRepository.update(id, {
       employeeId,
-      companyId,
+      companyId: decoded.userId,
       totalPrice,
       paymentStatus,
       discount,

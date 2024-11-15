@@ -6,11 +6,11 @@ import { employeeSelect } from "../utils/selectors";
 const prisma = new PrismaClient();
 
 class EmployeeRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
 
     const skip = (page - 1) * limit;
-    const where: Prisma.EmployeeWhereInput | undefined = filter
+    let where: Prisma.EmployeeWhereInput = filter
       ? ({
           OR: [
             { name: { contains: filter, mode: "insensitive" } },
@@ -19,7 +19,9 @@ class EmployeeRepository {
             { address: { contains: filter, mode: "insensitive" } },
           ],
         } as const)
-      : undefined;
+      : {};
+
+    where = { ...where, companyId }
 
     const employees = await prisma.employee.findMany({
       where,
@@ -60,6 +62,7 @@ class EmployeeRepository {
     roleId,
     userName,
     password,
+    companyId,
   }: IEmployee) {
     const hashedPassword = await bcrypt.hash(password, 10);
     const employee = await prisma.employee.create({
@@ -71,6 +74,7 @@ class EmployeeRepository {
         roleId,
         userName,
         password: hashedPassword,
+        companyId,
       },
     });
     const { password: _, ...employeeWithoutPassword } = employee;
@@ -79,7 +83,7 @@ class EmployeeRepository {
 
   async update(
     id: string,
-    { name, email, phone, address, roleId, userName, password }: IEmployee
+    { name, email, phone, address, roleId, userName, password, companyId }: IEmployee
   ) {
     const hashedUpdatePassword = await bcrypt.hash(password, 10);
     const employee = await prisma.employee.update({
@@ -92,6 +96,7 @@ class EmployeeRepository {
         roleId,
         userName,
         password: hashedUpdatePassword,
+        companyId,
       },
     });
     const { password: _, ...employeeWithoutPassword } = employee;

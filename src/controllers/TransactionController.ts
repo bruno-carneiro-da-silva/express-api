@@ -4,6 +4,7 @@ import { z } from "zod";
 import ProductRepository from "../repositories/ProductRepository";
 import EmployeeRepository from "../repositories/EmployeeRepository";
 import SupplierRepository from "../repositories/SupplierRepository";
+import jwt from "jsonwebtoken";
 
 export const index: RequestHandler = async (request, response) => {
   try {
@@ -128,9 +129,20 @@ export const update: RequestHandler = async (request, response) => {
     if (!idBody.success) {
       return response.status(400).json({ error: "ID inválido" });
     }
+
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
+
     const productExists = await ProductRepository.findById(productId);
     const employeeExists = await EmployeeRepository.findById(employeeId);
-    const supplierExists = await SupplierRepository.findByDoc(supplierCnpj);
+    const supplierExists = await SupplierRepository.findByDoc(supplierCnpj, decoded.userId);
     const transactionExists = await TransactionRepository.findById(id);
 
     if (!transactionExists) {

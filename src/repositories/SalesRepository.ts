@@ -6,11 +6,11 @@ import { InsufficientStockError } from "../error/InsufficientStockError";
 const prisma = new PrismaClient();
 
 class SalesRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const skip = (page - 1) * limit;
 
-    const where: Prisma.SaleWhereInput | undefined = filter
+    let where: Prisma.SaleWhereInput = filter
       ? {
         OR: [
           { employee: { name: { contains: filter, mode: "insensitive" } } },
@@ -28,7 +28,9 @@ class SalesRepository {
           },
         ],
       }
-      : undefined;
+      : {};
+
+      where = { ...where, companyId }
 
     const sales = await prisma.sale.findMany({
       where,

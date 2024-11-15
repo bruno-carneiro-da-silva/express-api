@@ -3,17 +3,28 @@ import ProductRepository from "../repositories/ProductRepository";
 import StockRepository from "../repositories/StockRepository";
 import { z } from "zod";
 import CategoriesRepository from "../repositories/CategoriesRepository";
+import jwt from "jsonwebtoken";
 
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy, page = "1", filter = "" } = request.query;
     const per_page = 4;
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const { products, total } = await ProductRepository.findAll(
       orderBy as string,
       Number(page),
       per_page,
-      filter as string
+      filter as string,
+      decoded.userId
     );
 
     return response.json({ products, total, per_page });
@@ -79,6 +90,15 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Existem campos não preenchidos" });
     }
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const categoryExists = await CategoriesRepository.listOne(categoryId);
 
     const productExists = await ProductRepository.findByName(name);
@@ -98,6 +118,7 @@ export const store: RequestHandler = async (request, response) => {
       price,
       categoryId,
       photos,
+      companyId: decoded.userId,
     });
 
     await StockRepository.create({
@@ -153,6 +174,15 @@ export const update: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "ID inválido" });
     }
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const productNameExists = await ProductRepository.findByName(name);
     const productIdExists = await ProductRepository.findById(id);
     const categoryExists = await CategoriesRepository.listOne(categoryId);
@@ -176,6 +206,7 @@ export const update: RequestHandler = async (request, response) => {
       photos,
       categoryId,
       minStock,
+      companyId: decoded.userId,
     });
 
     const stockExists = await StockRepository.findByProductId(id);

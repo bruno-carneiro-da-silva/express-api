@@ -4,18 +4,20 @@ import { productSelect } from "../utils/selectors";
 const prisma = new PrismaClient();
 
 class ProductRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
 
     const skip = (page - 1) * limit;
-    const where: Prisma.ProductWhereInput | undefined = filter
+    let where: Prisma.ProductWhereInput = filter
       ? ({
           OR: [
             { name: { contains: filter, mode: "insensitive" } },
             { description: { contains: filter, mode: "insensitive" } },
           ],
         } as const)
-      : undefined;
+      : {};
+
+    where = { ...where, companyId }
 
     const products = await prisma.product.findMany({
       where,
@@ -63,6 +65,7 @@ class ProductRepository {
     price,
     categoryId,
     photos,
+    companyId,
   }: IProduct) {
     const product = await prisma.product.create({
       data: {
@@ -75,6 +78,7 @@ class ProductRepository {
         photos: {
           create: photos.map((base64: string) => ({ base64 })),
         },
+        companyId,
       },
       include: {
         photos: true,

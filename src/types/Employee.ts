@@ -7,6 +7,7 @@ export interface IEmployee {
   roleId: string;
   userName: string;
   password: string;
+  companyId: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

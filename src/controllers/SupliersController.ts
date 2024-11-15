@@ -9,11 +9,21 @@ export const index: RequestHandler = async (request, response) => {
     const { orderBy, page = "1", filter = "" } = request.query;
     const per_page = 4;
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const { suppliers, total } = await SupplierRepository.findAll(
       orderBy as string,
       Number(page),
       per_page,
-      filter as string
+      filter as string,
+      decoded.userId,
     );
 
     return response.json({ suppliers, total, per_page });
@@ -57,7 +67,16 @@ export const showByCnpj: RequestHandler = async (request, response) => {
       return response.status(400).json({ error: "CNPJ inválido" });
     }
 
-    const supplier = await SupplierRepository.findByDoc(cnpj);
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
+    const supplier = await SupplierRepository.findByDoc(cnpj, decoded.userId);
 
     if (!supplier) {
       return response.status(404).json({ error: "Fornecedor não existe" });
@@ -106,26 +125,24 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const supplierExists = await SupplierRepository.findByDoc(cnpj);
-    if (supplierExists) {
-      return response.status(400).json({ error: "Este CNPJ já esta em uso" });
-    }
-
-    const emailExists = await SupplierRepository.findByEmail(email);
-
-    if (emailExists) {
-      return response.status(400).json({ error: "Este email já está em uso" });
-    }
-
     const authHeader = request.headers.authorization;
     if (!authHeader) {
       return response.status(401).json({ error: "Token não fornecido" });
     }
-
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
     };
+
+    const supplierExists = await SupplierRepository.findByDoc(cnpj, decoded.userId);
+    if (supplierExists) {
+      return response.status(400).json({ error: "Este CNPJ já esta em uso" });
+    }
+
+    const emailExists = await SupplierRepository.findByEmail(email, decoded.userId);
+    if (emailExists) {
+      return response.status(400).json({ error: "Este email já está em uso" });
+    }
 
     const supplier = await SupplierRepository.create({
       name,
@@ -192,27 +209,25 @@ export const update: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
-    const supplierExists = await SupplierRepository.findByDoc(cnpj);
-
-    if (!supplierExists) {
-      return response.status(404).json({ error: "Fornecedor inexistente" });
-    }
-
-    const emailExists = await SupplierRepository.findByEmail(email);
-
-    if (emailExists && emailExists.id !== id) {
-      return response.status(400).json({ error: "Este email já está em uso" });
-    }
-
     const authHeader = request.headers.authorization;
     if (!authHeader) {
       return response.status(401).json({ error: "Token não fornecido" });
     }
-
     const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
       userId: string;
     };
+
+
+    const supplierExists = await SupplierRepository.findByDoc(cnpj, decoded.userId);
+    if (!supplierExists) {
+      return response.status(404).json({ error: "Fornecedor inexistente" });
+    }
+
+    const emailExists = await SupplierRepository.findByEmail(email, decoded.userId);
+    if (emailExists && emailExists.id !== id) {
+      return response.status(400).json({ error: "Este email já está em uso" });
+    }
 
     const supplier = await SupplierRepository.update(id, {
       name,

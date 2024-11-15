@@ -1,17 +1,28 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import ContactsRepository from "../repositories/ContactsRepository";
+import jwt from "jsonwebtoken";
 
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy, page = "1", filter = "" } = request.query;
     const per_page = 5;
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const { contacts, total } = await ContactsRepository.findAll(
       orderBy as string,
       Number(page),
       per_page,
-      filter as string
+      filter as string,
+      decoded.userId
     );
 
     response.json({ contacts, total, per_page });

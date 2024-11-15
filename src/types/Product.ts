@@ -8,6 +8,7 @@ export interface IProduct {
   qtd: number;
   price: number;
   categoryId: string;
+  companyId: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

@@ -3,20 +3,22 @@ import { IContact } from "../types/Contact";
 const prisma = new PrismaClient();
 
 class ContactsRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const skip = (page - 1) * limit;
 
-    const where: Prisma.ContactWhereInput | undefined = filter
+    let where: Prisma.ContactWhereInput = filter
       ? ({
-          OR: [
-            { name: { contains: filter, mode: "insensitive" } },
-            { email: { contains: filter, mode: "insensitive" } },
-            { phone: { contains: filter, mode: "insensitive" } },
-            { address: { contains: filter, mode: "insensitive" } },
-          ],
-        } as const)
-      : undefined;
+        OR: [
+          { name: { contains: filter, mode: "insensitive" } },
+          { email: { contains: filter, mode: "insensitive" } },
+          { phone: { contains: filter, mode: "insensitive" } },
+          { address: { contains: filter, mode: "insensitive" } },
+        ],
+      } as const)
+      : {};
+
+    where = { ...where, companyId }
 
     const contacts = await prisma.contact.findMany({
       where,

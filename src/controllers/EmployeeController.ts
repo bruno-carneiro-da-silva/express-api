@@ -2,13 +2,28 @@ import { RequestHandler } from "express";
 import EmployeeRepository from "../repositories/EmployeeRepository";
 import { z } from "zod";
 import RoleRepository from "../repositories/RoleRepository";
+import jwt from 'jsonwebtoken'
 
 export const index: RequestHandler = async (request, response) => {
   try {
     const { orderBy, page = "1", filter = '' } = request.query;
     const per_page = 4
 
-    const { employees, total } = await EmployeeRepository.findAll(orderBy as string, Number(page), per_page, filter as string);
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
+    const { employees, total } = await EmployeeRepository.findAll(
+      orderBy as string, Number(page),
+      per_page,
+      filter as string,
+      decoded.userId
+    );
 
     response.json({ employees, total, per_page });
   } catch {
@@ -54,6 +69,15 @@ export const store: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const roleExists = await RoleRepository.findById(roleId);
 
     if (!roleExists) {
@@ -68,6 +92,7 @@ export const store: RequestHandler = async (request, response) => {
       roleId,
       userName,
       password,
+      companyId: decoded.userId,
     });
     response.status(201).json(newEmployee);
   } catch {
@@ -99,6 +124,15 @@ export const update: RequestHandler = async (request, response) => {
         .json({ error: "Todos os campos são obrigatórios" });
     }
 
+    const authHeader = request.headers.authorization;
+    if (!authHeader) {
+      return response.status(401).json({ error: "Token não fornecido" });
+    }
+    const token = authHeader.split(" ")[1];
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      userId: string;
+    };
+
     const updatedEmployee = await EmployeeRepository.update(id, {
       name,
       email,
@@ -107,6 +141,7 @@ export const update: RequestHandler = async (request, response) => {
       roleId,
       userName,
       password,
+      companyId: decoded.userId
     });
     if (!updatedEmployee) {
       return response.status(404).json({ error: "Funcionário não encontrado" });

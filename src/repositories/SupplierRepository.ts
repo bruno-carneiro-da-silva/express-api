@@ -3,20 +3,22 @@ import { ISupplier } from "../types/Supplier";
 const prisma = new PrismaClient();
 
 class SupplierRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string) {
+  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const skip = (page - 1) * limit;
 
-    const where: Prisma.SupplierWhereInput | undefined = filter
+    let where: Prisma.SupplierWhereInput = filter
       ? ({
-          OR: [
-            { name: { contains: filter, mode: "insensitive" } },
-            { email: { contains: filter, mode: "insensitive" } },
-            { phone: { contains: filter, mode: "insensitive" } },
-            { address: { contains: filter, mode: "insensitive" } },
-          ],
-        } as const)
-      : undefined;
+        OR: [
+          { name: { contains: filter, mode: "insensitive" } },
+          { email: { contains: filter, mode: "insensitive" } },
+          { phone: { contains: filter, mode: "insensitive" } },
+          { address: { contains: filter, mode: "insensitive" } },
+        ],
+      } as const)
+      : {};
+
+    where = { ...where, companyId }
 
     const suppliers = await prisma.supplier.findMany({
       where,
@@ -98,16 +100,16 @@ class SupplierRepository {
     return supplier;
   }
 
-  async findByDoc(cnpj: string) {
+  async findByDoc(cnpj: string, companyId: string) {
     const supplier = await prisma.supplier.findUnique({
-      where: { cnpj },
+      where: { cnpj, companyId },
     });
     return supplier;
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string, companyId: string) {
     const supplier = await prisma.supplier.findUnique({
-      where: { email },
+      where: { email, companyId },
     });
     return supplier;
   }

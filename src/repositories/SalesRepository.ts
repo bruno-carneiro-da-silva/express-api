@@ -6,31 +6,37 @@ import { InsufficientStockError } from "../error/InsufficientStockError";
 const prisma = new PrismaClient();
 
 class SalesRepository {
-  async findAll(orderBy = "ASC", page: number, limit: number, filter: string, companyId: string) {
+  async findAll(
+    orderBy = "ASC",
+    page: number,
+    limit: number,
+    filter: string,
+    companyId: string
+  ) {
     const direction = orderBy.toUpperCase() === "DESC" ? "desc" : "asc";
     const skip = (page - 1) * limit;
 
     let where: Prisma.SaleWhereInput = filter
       ? {
-        OR: [
-          { employee: { name: { contains: filter, mode: "insensitive" } } },
-          {
-            company: {
-              emailAdmin: { contains: filter, mode: "insensitive" },
-            },
-          },
-          {
-            soldItems: {
-              some: {
-                product: { name: { contains: filter, mode: "insensitive" } },
+          OR: [
+            { employee: { name: { contains: filter, mode: "insensitive" } } },
+            {
+              company: {
+                emailAdmin: { contains: filter, mode: "insensitive" },
               },
             },
-          },
-        ],
-      }
+            {
+              soldItems: {
+                some: {
+                  product: { name: { contains: filter, mode: "insensitive" } },
+                },
+              },
+            },
+          ],
+        }
       : {};
 
-      where = { ...where, companyId }
+    where = { ...where, companyId };
 
     const sales = await prisma.sale.findMany({
       where,
@@ -112,16 +118,27 @@ class SalesRepository {
     });
   }
 
-  async handleStock(prisma: Prisma.TransactionClient, soldItems: ISale['soldItems'], paymentStatus: ISale['paymentStatus'], oldSale?: Sale) {
-    const updateStock = async ({ items, adding }: { items: ISale['soldItems'], adding: boolean }) => {
+  async handleStock(
+    prisma: Prisma.TransactionClient,
+    soldItems: ISale["soldItems"],
+    paymentStatus: ISale["paymentStatus"],
+    oldSale?: Sale
+  ) {
+    const updateStock = async ({
+      items,
+      adding,
+    }: {
+      items: ISale["soldItems"];
+      adding: boolean;
+    }) => {
       for (const item of items) {
         const stock = await prisma.stock.findUnique({
           where: { productId: item.productId },
         });
 
         if (stock) {
-          const qtd = adding ? stock.qtd + item.qtd : stock.qtd - item.qtd
-          console.log('updating new qtd', qtd)
+          const qtd = adding ? stock.qtd + item.qtd : stock.qtd - item.qtd;
+          console.log("updating new qtd", qtd);
           await prisma.stock.update({
             where: { productId: item.productId },
             data: {
@@ -130,7 +147,7 @@ class SalesRepository {
           });
         }
       }
-    }
+    };
 
     if (oldSale) {
       const oldSoldItems = await prisma.soldItem.findMany({
@@ -138,15 +155,15 @@ class SalesRepository {
       });
       if (oldSoldItems) {
         // devolver estoque dos antigos produtos
-        await updateStock({ items: oldSoldItems, adding: true })
+        await updateStock({ items: oldSoldItems, adding: true });
       }
       await prisma.soldItem.deleteMany({
-        where: { saleId: oldSale.id }
-      })
+        where: { saleId: oldSale.id },
+      });
 
-      if (paymentStatus !== 'CANCELED') {
+      if (paymentStatus !== "CANCELED") {
         // caso a venda não foi cancelada atualizar o estoque
-        await updateStock({ items: soldItems, adding: false })
+        await updateStock({ items: soldItems, adding: false });
       }
     } else {
       // criando venda pela primeira vez: reduzir estoque dos produtos vendidos
@@ -156,14 +173,18 @@ class SalesRepository {
           where: { productId: item.productId },
         });
 
-        if (!stock || stock.qtd < item.qtd) {
+        if (
+          !stock ||
+          stock.qtd < item.qtd ||
+          stock.qtd - item.qtd < stock.minStock
+        ) {
           throw new InsufficientStockError(
-            `Quantidade insuficiente no estoque para o produto ${item.productId}`
+            `Quantidade insuficiente ou estoque ultrapassou o estoque minimo do item`
           );
         }
       }
       // atualizar o estoque dos produtos vendidos
-      await updateStock({ items: soldItems, adding: false })
+      await updateStock({ items: soldItems, adding: false });
     }
   }
 
@@ -176,7 +197,7 @@ class SalesRepository {
     soldItems,
   }: ISale) {
     const result = await prisma.$transaction(async (prisma) => {
-      await this.handleStock(prisma, soldItems, paymentStatus)
+      await this.handleStock(prisma, soldItems, paymentStatus);
 
       const sale = await prisma.sale.create({
         data: {
@@ -220,9 +241,9 @@ class SalesRepository {
       });
 
       return sale;
-    })
+    });
 
-    return result
+    return result;
   }
 
   async update(
@@ -240,7 +261,7 @@ class SalesRepository {
       const oldSale = await prisma.sale.findUnique({ where: { id } });
 
       if (!oldSale) {
-        throw new Error('Venda não encontrada!');
+        throw new Error("Venda não encontrada!");
       }
 
       await this.handleStock(prisma, soldItems, paymentStatus, oldSale);
@@ -291,7 +312,6 @@ class SalesRepository {
 
     return result;
   }
-
 
   async delete(id: string) {
     return prisma.sale.delete({
